@@ -38,6 +38,8 @@ def initialize():
         CREATE TABLE IF NOT EXISTS fleets (
           user_id INTEGER PRIMARY KEY REFERENCES users(id),
           version INTEGER NOT NULL DEFAULT 0, body TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS profiles (
+          user_id INTEGER PRIMARY KEY REFERENCES users(id), name TEXT NOT NULL DEFAULT '', avatar TEXT NOT NULL DEFAULT '');
         CREATE TABLE IF NOT EXISTS attempts (
           identity TEXT PRIMARY KEY, count INTEGER NOT NULL, expires INTEGER NOT NULL);
         ''')
@@ -110,6 +112,9 @@ class Handler(BaseHTTPRequestHandler):
                     return self.reply(401, {'error': 'Entre na sua conta.'})
                 if path == '/api/session':
                     return self.reply(200, {'email': s[3], 'csrf': s[2]})
+                if path == '/api/context':
+                    row = c.execute('SELECT name,avatar FROM profiles WHERE user_id=?', (s[1],)).fetchone()
+                    return self.reply(200, {'role':'manager', 'user_id':s[1], 'profile':{'name':row[0] if row else '', 'avatar':row[1] if row else ''}})
                 if path == '/api/fleet':
                     row = c.execute('SELECT version,body FROM fleets WHERE user_id=?', (s[1],)).fetchone()
                     return self.reply(200, {'version': row[0], 'state': json.loads(row[1])})
@@ -121,7 +126,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', str(len(raw)))
             self.end_headers()
             return self.wfile.write(raw)
-        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js'}
+        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css'}
         if path not in files:
             return self.reply(404, {'error': 'Não encontrado.'})
         target = ROOT / 'public' / files[path]
@@ -129,7 +134,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply(404, {'error':'Execute npm run build para gerar os arquivos.'})
         raw = target.read_bytes()
         self.send_response(200)
-        self.send_header('Content-Type', 'text/html; charset=utf-8' if path == '/' else 'text/javascript; charset=utf-8')
+        self.send_header('Content-Type', 'text/html; charset=utf-8' if path == '/' else 'text/css; charset=utf-8' if path.endswith('.css') else 'text/javascript; charset=utf-8')
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('X-Frame-Options', 'DENY')
@@ -200,6 +205,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(401, {'error': 'Sessão expirada. Entre novamente.'})
             if not hmac.compare_digest(self.headers.get('X-CSRF-Token', ''), s[2]):
                 return self.reply(403, {'error': 'Sessão inválida. Recarregue a página.'})
+            if path == '/api/profile':
+                name,avatar=body.get('name'),body.get('avatar')
+                import re
+                if not isinstance(name,str) or not 1 <= len(name.strip()) <= 80 or not isinstance(avatar,str) or len(avatar)>65536 or (avatar and not re.fullmatch(r'data:image/jpeg;base64,[A-Za-z0-9+/=]+',avatar)):
+                    raise ValueError()
+                c.execute('INSERT INTO profiles VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET name=excluded.name,avatar=excluded.avatar',(s[1],name.strip(),avatar))
+                c.commit()
+                return self.reply(200, {'name':name.strip(),'avatar':avatar})
             if path == '/api/logout':
                 c.execute('DELETE FROM sessions WHERE token=?', (s[0],))
                 c.commit()

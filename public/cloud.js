@@ -19,7 +19,7 @@ function exportBackup() {
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function resetView(state) {
-  S = {...state, role:'ges'};
+  S = {...state, role:cloud.context?.role==='driver'?'mot':'ges'};
   open=null; docOpen=null; ed=null; cmp=null; pcOpen=null; rvOpen=null;
   render();
 }
@@ -73,23 +73,19 @@ function authScreen() {
 async function enter(session) {
   if(window.FleetOnRemote?.recovering) {recoveryScreen();return;}
   cloud.csrf=session.csrf;
+  cloud.context=await api('context');
   const data=await api('fleet');
   cloud.version=data.version; cloud.blocked=false; cloud.dirty=false;
   resetView(data.state); cloud.lastState=JSON.stringify(stateOnly());
-  account.innerHTML=`<div class="panel"><div class="row"><span id="user-email"></span><button class="btn sec" id="logout">Sair</button></div>
-  <p>Dados salvos nesta conta. O modo motorista é apenas uma visualização; o PIN antigo não controla o acesso à conta.</p>
-  <div class="form"><button class="btn sec" id="refresh">Atualizar dados</button><button class="btn sec" id="backup">Exportar backup</button>
-  <label>Importar dados do HTML antigo (JSON)<input id="import" type="file" accept="application/json,.json"></label></div>
-  <p>Importação disponível somente com a frota vazia. No HTML antigo, os dados ficam no navegador onde foram cadastrados; abrir este site não os transfere automaticamente.</p></div>`;
-  document.querySelector('#user-email').textContent=session.email;
+  paintAccount(session,cloud.context);
   document.querySelector('#workspace').hidden=false;
   document.querySelector('#workspace').inert=false;
   syncStatus.textContent='Dados carregados do servidor.';
-  document.querySelector('#backup').onclick=exportBackup;
+  if(document.querySelector('#backup'))document.querySelector('#backup').onclick=exportBackup;
   document.querySelector('#logout').onclick=async()=>{
     if(cloud.busy) return;
     if(cloud.dirty && !confirm('Há alterações não salvas. Exporte um backup antes de sair. Deseja sair mesmo assim?')) return;
-    try {await api('logout',{}); resetView({cars:[],drivers:[],log:[],fines:[]}); cloud.csrf=''; cloud.dirty=false; syncStatus.textContent=''; authScreen();}
+    try {await api('logout',{}); cloud.context=null; resetView({cars:[],drivers:[],log:[],fines:[]}); cloud.csrf=''; cloud.dirty=false; syncStatus.textContent=''; authScreen();}
     catch(error){syncStatus.textContent=error.message;}
   };
   document.querySelector('#refresh').onclick=async()=>{
@@ -97,7 +93,7 @@ async function enter(session) {
     if(cloud.dirty && !confirm('Atualizar descarta as alterações não salvas. Já exportou o backup e deseja continuar?')) return;
     try{await enter(await api('session'));}catch(error){syncStatus.textContent=error.message;}
   };
-  document.querySelector('#import').onchange=async event=>{
+  if(document.querySelector('#import'))document.querySelector('#import').onchange=async event=>{
     const file=event.target.files[0]; if(!file || cloud.busy || cloud.blocked) return;
     if(Object.values(stateOnly()).some(items=>items.length)) {syncStatus.textContent='A importação exige uma frota vazia para evitar substituir registros.'; return;}
     if(file.size>8*1024*1024) {syncStatus.textContent='Arquivo maior que 8 MB.'; return;}
@@ -134,3 +130,10 @@ window.addEventListener('fleeton-recovery',recoveryScreen);
     if(error.message !== 'Entre na sua conta.') document.querySelector('#auth-error').textContent=error.message;
   }
 })();
+
+async function driverTrip(action,car) {
+  try {
+    const fleet=await api('trip',{p_version:cloud.version,p_car_id:car.id,p_action:action,p_km:action==='in'?Number(document.querySelector('#kmf').value):null,p_destination:action==='out'?document.querySelector('#dest').value.trim():'',p_condition:document.querySelector('#comb').value+', '+document.querySelector('#av').value,p_photo:await foto()});
+    cloud.version=fleet.version;resetView(fleet.state);cloud.lastState=JSON.stringify(stateOnly());syncStatus.textContent='Viagem registrada.';
+  }catch(error){syncStatus.textContent=error.message;}
+}

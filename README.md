@@ -17,7 +17,9 @@ Nenhum serviço foi criado ou publicado automaticamente por este repositório.
    com segurança; ela não é usada nas telas do FleetOn.
 2. Abra **SQL Editor**, copie o conteúdo completo de
    [`supabase/001_fleeton.sql`](supabase/001_fleeton.sql) e execute.
-   A migração pode ser reaplicada sem apagar os dados.
+   Depois execute também [`supabase/002_profiles_roles.sql`](supabase/002_profiles_roles.sql)
+   para habilitar os perfis e as permissões. As migrações podem ser reaplicadas
+   na ordem 001 → 002 sem apagar os dados. Se já executou 001, basta executar 002.
 3. Em **Project Settings → API** (ou **API Keys**), copie a **Project URL** e a
    chave **publishable** (`sb_publishable_...`) ou a chave legada **anon**.
    São configurações públicas. Nunca use `service_role`, `sb_secret_...` ou a
@@ -104,15 +106,43 @@ projeto Supabase real.
 
 ## Dados, contas e sincronização
 
-Nesta versão, **cada conta possui uma frota**. O mesmo login acessa os dados
-em outros dispositivos. Não há convites, organização com múltiplos usuários
-ou permissões de gestor/motorista no banco. A visão do motorista é somente
-um filtro visual. O PIN do HTML antigo foi removido.
+Cada conta nova começa como **gestor da própria frota**, sem acesso às demais.
+O gestor abre **Minha conta → Equipe** e convida motoristas pelo e-mail.
+O motorista cria uma conta com esse mesmo e-mail, confirma o cadastro e aceita
+explicitamente o convite exibido ao entrar. O convite fica no aplicativo; não
+envia e-mail automaticamente. Nesta versão, uma conta participa de uma frota.
+Uma conta com frota própria preenchida/equipe não pode aceitar outra frota: use
+uma conta nova ou vazia. Convites pendentes da própria equipe devem ser cancelados
+antes de aceitar um convite de outra empresa.
+
+**Gestor:** administra veículos, cadastros, despesas, multas, histórico, backups
+e os convites/acessos da equipe. **Motorista:** vê os veículos e registra a
+retirada/devolução; o banco determina a identidade do motorista e permite devolver
+somente o veículo retirado pela própria conta. Não recebe histórico financeiro,
+multas, documentos, peças ou backup completo, e não pode gravar o documento da
+frota nem alterar permissões. A remoção de acesso é impedida enquanto houver
+veículo com o motorista. Uma edição após revogação é negada no banco mesmo que
+outra aba ainda exiba a interface antiga. O gestor ainda pode usar uma prévia da
+visão do motorista, que não altera suas permissões.
+
+**Minha conta → Meu perfil** permite salvar nome e foto JPEG compactada de
+128×128 por usuário, separados dos dados da frota e protegidos pelas funções de
+banco. Essas informações acompanham o login nos dispositivos e não ficam em
+metadados de autenticação/tokens. A foto original pode ter até 5 MB; o resultado
+salvo tem limite de 64 KiB. Nenhuma conta pode escolher o próprio cargo no perfil.
+Os cadastros manuais da aba Motoristas continuam disponíveis ao gestor; convidar
+uma conta não associa automaticamente uma CNH desse cadastro. As operações da
+conta motorista ficam identificadas com usuário e nome nos registros de viagem.
+
+Para instalações já publicadas, execute **002_profiles_roles.sql** no SQL Editor.
+Até a atualização, o aplicativo continua no modelo anterior (conta individual) e
+indica em Minha conta que perfis/equipe estão pendentes. Não declare permissões
+implantadas antes de aplicar a atualização no banco real.
 
 O SDK oficial gerencia a sessão e a renovação de tokens. No Supabase, os tokens
 ficam no armazenamento do navegador: use **Sair** em computadores compartilhados.
-A senha é tratada pelo Supabase Auth. O banco tem Row Level Security; usuários
-podem consultar somente a própria frota. As gravações só são permitidas por
+A senha é tratada pelo Supabase Auth. O banco usa Row Level Security e funções com identidade autenticada; o acesso
+aos dados depende do vínculo e cargo na equipe. As gravações só são permitidas por
 uma função que determina a conta pelo usuário autenticado, valida o conteúdo
 e exige a versão atual. A chave pública sozinha não dá acesso a dados privados.
 
@@ -153,7 +183,9 @@ no Supabase antes de importar os registros.
 python3 server.py
 ```
 
-Ela serve a interface com `backend: local`, guarda dados em
+Ela serve a interface com `backend: local` e perfis pessoais. As permissões e
+equipes são exclusivas da integração Supabase; no modo local cada conta mantém
+sua frota isolada como gestor. A versão local guarda dados em
 `data/fleeton.sqlite3` (ou `FLEETON_DB`) e não usa o Supabase. O banco existente
 é preservado e ignorado pelo Git. Não confunda esse servidor local com o build
 estático de produção. Para backup completo, use a API de backup do SQLite;

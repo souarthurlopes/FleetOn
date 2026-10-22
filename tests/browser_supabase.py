@@ -33,6 +33,8 @@ try:
         token=b64({'alg':'HS256','typ':'JWT'})+'.'+b64({'sub':user['id'],'aud':'authenticated','role':'authenticated','email':user['email'],'exp':int(time.time())+3600})+'.test'
         session={'access_token':token,'refresh_token':'refresh-test','expires_in':3600,'token_type':'bearer','user':user}
         fleet={'version':0,'state':{'cars':[],'drivers':[],'log':[],'fines':[]}}
+        profile_context={'role':'manager','user_id':user['id'],'owner_id':user['id'],'profile':{'name':'','avatar':''},'invitation':None}
+        team={'members':[],'invites':[]}
         calls=[]
         def remote(route):
             req=route.request;path=req.url.split('.co')[1];calls.append(path)
@@ -43,6 +45,20 @@ try:
             if path.startswith('/auth/v1/token'):return reply(session)
             if path.startswith('/auth/v1/user'):return reply(user)
             if path.startswith('/auth/v1/recover') or path.startswith('/auth/v1/logout'):return reply({})
+            if path.startswith('/rest/v1/rpc/fleeton_context'):return reply(profile_context)
+            if path.startswith('/rest/v1/rpc/fleeton_save_profile'):
+                args=req.post_data_json;profile_context['profile']={'name':args['p_name'],'avatar':args['p_avatar']};return reply(profile_context['profile'])
+            if path.startswith('/rest/v1/rpc/fleeton_team'):
+                args=req.post_data_json
+                if args['p_action']=='invite':team['invites']=[{'email':args['p_email']}]
+                if args['p_action']=='remove':team['invites']=[]
+                return reply(team)
+            if path.startswith('/rest/v1/rpc/fleeton_driver_trip'):
+                args=req.post_data_json
+                car=fleet['state']['cars'][0]
+                if args['p_action']=='out':car['uso']={'user_id':user['id'],'mot':'Ana','dest':args['p_destination'],'quando':'Hoje','kmIni':car['km']}
+                else:car['uso']=None;car['km']=args['p_km']
+                fleet['version']+=1;return reply(fleet)
             if path.startswith('/rest/v1/rpc/fleeton_get_fleet'):return reply(fleet)
             if path.startswith('/rest/v1/rpc/fleeton_save_fleet'):
                 body=req.post_data_json
@@ -56,6 +72,18 @@ try:
         assert not page.locator('#workspace').is_visible()
         page.locator('#reset-password').click();page.get_by_text('Se o endereço estiver cadastrado',exact=False).wait_for()
         page.locator('#password').fill('test-password-123');page.get_by_role('button',name='Entrar',exact=True).click();page.locator('#user-email').wait_for()
+        assert not page.locator('#account-settings').evaluate('(e)=>e.open')
+        page.locator('#account-settings > summary').click()
+        page.locator('#edit-name').fill('Ana Lopes')
+        image=page.evaluate("(()=>{const c=document.createElement('canvas');c.width=c.height=10;c.getContext('2d').fillRect(0,0,10,10);return c.toDataURL('image/png').split(',')[1]})()")
+        page.locator('#edit-avatar').set_input_files({'name':'avatar.png','mimeType':'image/png','buffer':base64.b64decode(image)})
+        page.get_by_role('button',name='Salvar perfil',exact=True).click();page.get_by_text('Perfil salvo.',exact=True).wait_for()
+        assert page.locator('#profile-name').inner_text()=='Ana Lopes'
+        assert profile_context['profile']['avatar'].startswith('data:image/jpeg;base64,')
+        page.locator('#invite-email').fill('driver@example.com');page.get_by_role('button',name='Convidar motorista',exact=True).click()
+        page.get_by_text('driver@example.com · Convite pendente',exact=True).wait_for()
+        page.locator('#account-settings > summary').click()
+        page.screenshot(path='/tmp/fleeton-profile.png',full_page=True)
         page.locator('[data-t="car"]').click();page.locator('#np').fill('CLOUD123');page.locator('#nm').fill('Nuvem');page.locator('#nk').fill('100');page.locator('#nr').fill('10000');page.locator('[data-go="add:0"]').click()
         page.get_by_text('Salvo no servidor.',exact=True).wait_for()
         assert fleet['state']['cars'][0]['placa']=='CLOUD123'
@@ -66,10 +94,24 @@ try:
         page.on('dialog',lambda d:d.accept());page.locator('#refresh').click();page.get_by_text('Dados carregados do servidor.',exact=True).wait_for()
         page.evaluate("window.dispatchEvent(new Event('fleeton-recovery'))")
         page.locator('#new-password').fill('new-password-123');page.get_by_role('button',name='Salvar senha',exact=True).click();page.locator('#user-email').wait_for()
+        profile_context['role']='driver'
+        profile_context['owner_id']='22222222-2222-2222-2222-222222222222'
+        fleet['state']['drivers']=[{'id':0,'nome':'Ana Lopes'}];fleet['state']['log']=[];fleet['state']['fines']=[]
+        page.reload();page.locator('#user-email').wait_for()
+        assert page.locator('#profile-role').inner_text()=='Motorista'
+        assert not page.locator('.tabs').is_visible()
+        assert page.locator('#invite-form').count()==0 and page.locator('#import').count()==0
+        assert not page.locator('[data-go="add:0"]').is_visible()
+        page.locator('[data-go^="open:"]').click();page.locator('#dest').fill('Cliente');page.locator('[data-go^="out:"]').click()
+        page.get_by_text('Viagem registrada.',exact=True).wait_for();assert fleet['state']['cars'][0]['uso']['user_id']==user['id']
+        page.locator('[data-go^="open:"]').click();page.locator('#kmf').fill('125');page.locator('[data-go^="in:"]').click()
+        page.wait_for_function("document.querySelector('.meta').textContent.includes('125')")
+        assert fleet['state']['cars'][0]['km']==125
+        assert any('/fleeton_driver_trip' in call for call in calls)
         page.locator('#logout').click();page.locator('#email').wait_for();assert not page.locator('#workspace').is_visible()
         assert any('/recover' in x for x in calls)
         assert not errors,errors
         browser.close()
-        print('PASS: SDK Supabase (APIs simuladas), configuração ausente, confirmação de e-mail, recuperação, login, gravação, sessão restaurada, conflito e saída.')
+        print('PASS: SDK Supabase (APIs simuladas), configuração ausente, confirmação de e-mail, recuperação, login, gravação, sessão restaurada, conflito, perfil com foto, convite, permissões nas telas, retirada/devolução e saída.')
 finally:
     process.terminate();process.wait(timeout=5)

@@ -24,6 +24,9 @@ window.FleetOnRemote = (() => {
   function fail(error) {
     if(!error) return;
     const message=String(error.message || '');
+    const errors={FLEET_FORBIDDEN:'Sua conta não tem permissão para essa ação.',PROFILE_INVALID:'Informe um nome de até 80 caracteres e uma foto válida.',EMAIL_INVALID:'Informe um e-mail válido.',TEAM_SELF:'Sua conta já é gestora desta frota.',TEAM_OTHER_FLEET:'Esse e-mail já participa de outra frota. Use uma conta nova ou vazia.',TEAM_ACTIVE_TRIP:'O motorista precisa devolver o veículo antes de ser removido.',TEAM_NO_INVITE:'Não há convite disponível. Confirme o e-mail da sua conta.',TRIP_INVALID:'Confira o destino e se você já está usando outro veículo.',TRIP_IN_USE:'Este veículo já está em uso. Atualize os dados.',TRIP_KM:'A quilometragem final não pode ser menor que a atual.'};
+    for(const [code,text] of Object.entries(errors)) if(message.includes(code)) throw new Error(text);
+
     if(message.includes('FLEET_CONFLICT')) throw new Error('A frota mudou em outro dispositivo. Exporte suas alterações e atualize antes de editar.');
     if(message.includes('FLEET_INVALID')) throw new Error('Arquivo ou dados da frota inválidos. Verifique o backup.');
     if(message.includes('FLEET_TOO_LARGE')) throw new Error('Dados maiores que 8 MB. Exporte um backup e reduza as fotos.');
@@ -50,6 +53,8 @@ window.FleetOnRemote = (() => {
     const {data:auth,error:authError}=await db.auth.getSession();fail(authError);
     if(!auth.session) throw new Error('Entre na sua conta.');
     if(path==='session') return sessionInfo(auth.session);
+    const operations={context:['fleeton_context',{}],profile:['fleeton_save_profile',{p_name:body?.name,p_avatar:body?.avatar}],team:['fleeton_team',{p_action:body?.action||'list',p_email:body?.email||''}],acceptInvite:['fleeton_accept_invite',{}],trip:['fleeton_driver_trip',body]};
+    if(operations[path]) {const [fn,args]=operations[path];const {data,error}=await db.rpc(fn,args);if(path==='context' && error?.code==='PGRST202')return {role:'manager',profile:{name:'',avatar:''},migrationRequired:true};fail(error);return data;}
     if(path==='fleet') {
       if(body && new Blob([JSON.stringify(body.state)]).size>8*1024*1024) throw new Error('Dados maiores que 8 MB. Exporte um backup.');
       const {data,error}=await db.rpc(body ? 'fleeton_save_fleet' : 'fleeton_get_fleet',body ? {p_version:body.version,p_state:body.state} : {});
