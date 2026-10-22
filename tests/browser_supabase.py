@@ -1,7 +1,7 @@
 """Offline browser contract test against the real Supabase SDK with mocked HTTPS APIs.
 The PostgreSQL/RLS migration is independently exercised by npm test.
 """
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, expect
 import base64
 import json
 import os
@@ -90,7 +90,7 @@ try:
         assert fleet['state']['cars'][0]['placa']=='CLOUD123'
         page.reload();page.locator('#user-email').wait_for();page.locator('[data-t="car"]').click();assert page.locator('.plate').inner_text()=='CLOUD123'
         page.set_viewport_size({'width':390,'height':844})
-        assert page.locator('#app-sidebar').evaluate('(e)=>e.inert')
+        page.wait_for_function("document.querySelector('#app-sidebar').inert")
         page.locator('#menu-toggle').click();page.locator('#profile-navigation').click()
         assert page.locator('#account-settings').is_visible()
         assert page.locator('#workspace').is_hidden()
@@ -104,8 +104,52 @@ try:
         page.locator('#menu-toggle').click();page.locator('[data-t="car"]').click()
         assert page.locator('#workspace').is_visible()
         page.set_viewport_size({'width':1280,'height':720})
-        assert not page.locator('#app-sidebar').evaluate('(e)=>e.inert')
+        page.wait_for_function("!document.querySelector('#app-sidebar').inert")
         page.locator('.theme-toggle').click()
+        # Use dates relative to the same Brasilia calendar as the application.
+        dates=page.evaluate("(()=>{const day=FleetInsights.today();const offset=n=>new Date(Date.parse(day+'T12:00:00Z')+n*86400000).toISOString().slice(0,10);return {past:offset(-1),today:day,soon:offset(1),future:offset(60)}})()")
+        original_car=fleet['state']['cars'][0]
+        original_car['ipva']=dates['past'];original_car['seg']=dates['today']
+        fleet['state']['cars'] += [{'id':2,'placa':'XYZ-4567','modelo':'Saveiro','km':100,'prox':10000,'uso':{'mot':'João da Silva','dest':'Cliente','quando':'Hoje','kmIni':100}}, {'id':3,'placa':'REV1234','modelo':'Fiorino','km':9500,'prox':10000,'uso':None}]
+        fleet['state']['drivers']=[{'id':7,'nome':'Ana teste','cnh':dates['soon']}]
+        page.locator('#refresh').click();page.get_by_text('Dados carregados do servidor.',exact=True).wait_for()
+        expect(page.locator('#logout')).to_have_count(1)
+        expect(page.locator('#profile-avatar')).to_have_count(1)
+        expect(page.locator('.account-header .account-identity')).to_have_count(0)
+        page.locator('#alerts-shortcut').click()
+        expect(page.locator('.alert-item')).to_have_count(4)
+        page.locator('#alert-severity').select_option('urgent');expect(page.locator('.alert-item')).to_have_count(2)
+        page.locator('#alert-category').select_option('drivers');expect(page.locator('.alert-item')).to_have_count(0)
+        page.locator('#clear-alert-filters').click();expect(page.locator('.alert-item')).to_have_count(4)
+        page.locator('[data-alert-car]').first.click()
+        expect(page.locator('.car:visible')).to_have_count(1)
+        page.locator('#clear-vehicle-filters').click();expect(page.locator('.car:visible')).to_have_count(3)
+        page.locator('#vehicle-search').fill('joao da silva');assert page.locator('.car:visible .plate').inner_text()=='XYZ-4567'
+        page.locator('#vehicle-search').fill('xyz4567');expect(page.locator('.car:visible')).to_have_count(1)
+        page.locator('#clear-vehicle-filters').click()
+        page.locator('#vehicle-status').select_option('available');expect(page.locator('.car:visible')).to_have_count(2)
+        page.locator('#vehicle-driver').select_option('João da Silva');expect(page.locator('.car:visible')).to_have_count(0)
+        assert page.locator('#vehicle-empty').is_visible()
+        page.locator('#clear-vehicle-filters').click();page.locator('#vehicle-status').select_option('attention');expect(page.locator('.car:visible')).to_have_count(2)
+        page.locator('#clear-vehicle-filters').click()
+        first_id=original_car['id']
+        page.locator(f'[data-go="docs:{first_id}"]').click();page.locator('#d1').fill(dates['future'])
+        page.locator('#vehicle-search').fill('cloud123')
+        assert page.locator('#d1').input_value()==dates['future']
+        page.locator(f'[data-go="savedocs:{first_id}"]').click();page.get_by_text('Salvo no servidor.',exact=True).wait_for()
+        page.locator('#alerts-shortcut').click();expect(page.locator('.alert-item')).to_have_count(3)
+        page.locator('[data-alert-target="drv"]').click()
+        page.locator('[data-go="editcnh:7"]').click();page.locator('#driver-cnh-date').fill(dates['future']);page.locator('[data-go="savecnh:7"]').click()
+        page.get_by_text('Salvo no servidor.',exact=True).wait_for();page.locator('#alerts-shortcut').click();expect(page.locator('.alert-item')).to_have_count(2)
+        page.screenshot(path='/tmp/fleeton-alerts.png',full_page=True,animations='disabled')
+        page.set_viewport_size({'width':390,'height':844});page.wait_for_function("document.querySelector('#app-sidebar').inert")
+        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+        page.screenshot(path='/tmp/fleeton-alerts-mobile.png',full_page=True,animations='disabled')
+        page.set_viewport_size({'width':1280,'height':720});page.wait_for_function("!document.querySelector('#app-sidebar').inert")
+        # Return to the original fixture for the remaining permission/conflict checks.
+        fleet['state']['cars']=[original_car];original_car.pop('ipva',None);original_car.pop('seg',None);fleet['state']['drivers']=[]
+        page.locator('#refresh').click();page.get_by_text('Dados carregados do servidor.',exact=True).wait_for()
+        page.locator('[data-t="car"]').click();page.locator('#clear-vehicle-filters').click()
         fleet['version']+=1
         page.locator('#np').fill('STALE123');page.locator('#nm').fill('Conflito');page.locator('[data-go="add:0"]').click()
         page.get_by_text('A frota mudou em outro dispositivo.',exact=False).wait_for();assert page.locator('#workspace').evaluate('(e)=>e.inert')
@@ -118,7 +162,9 @@ try:
         page.reload();page.locator('#user-email').wait_for()
         assert page.locator('#profile-role').inner_text()=='Motorista'
         assert not page.locator('.tabs').is_visible()
-        assert page.locator('#invite-form').count()==0 and page.locator('#import').count()==0
+        expect(page.locator('#alerts-shortcut')).to_have_count(0)
+        expect(page.locator('.alert-item')).to_have_count(0)
+        expect(page.locator('#invite-form')).to_have_count(0) and page.locator('#import').count()==0
         assert not page.locator('[data-go="add:0"]').is_visible()
         page.locator('[data-go^="open:"]').click();page.locator('#dest').fill('Cliente');page.locator('[data-go^="out:"]').click()
         page.get_by_text('Viagem registrada.',exact=True).wait_for();assert fleet['state']['cars'][0]['uso']['user_id']==user['id']
@@ -130,6 +176,6 @@ try:
         assert any('/recover' in x for x in calls)
         assert not errors,errors
         browser.close()
-        print('PASS: SDK Supabase (APIs simuladas), configuração ausente, confirmação de e-mail, recuperação, login, gravação, sessão restaurada, conflito, perfil com foto, convite, permissões nas telas, retirada/devolução e saída.')
+        print('PASS: SDK Supabase (APIs simuladas), configuração ausente, confirmação de e-mail, recuperação, login, gravação, sessão restaurada, conflito, perfil com foto, convite, central de alertas, filtros, atualização de CNH, permissões nas telas, retirada/devolução e saída.')
 finally:
     process.terminate();process.wait(timeout=5)

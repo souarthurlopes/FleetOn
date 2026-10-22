@@ -37,6 +37,7 @@ async function saveCloud() {
   }
 }
 function authScreen() {
+  resetFleetTools();
   layoutSignedOut();
   document.querySelector('#workspace').hidden=true;
   account.innerHTML=`<div class="panel" style="max-width:440px;margin:40px auto"><h2>Acesse sua frota</h2>

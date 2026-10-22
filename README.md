@@ -201,3 +201,28 @@ e guarda a escolha no dispositivo. As transições respeitam movimento reduzido.
 A identidade do usuário e as permissões continuam determinadas pelo banco.
 Alterações visuais são publicadas pelo build/deploy do Cloudflare, sem migração
 SQL adicional.
+
+## Alertas de vencimento e busca
+
+**Alertas**, na barra lateral, reúne IPVA, licenciamento, seguro, CNH, revisão
+por data/quilometragem e peças com vida útil cadastrada. O contador também aparece
+no cabeçalho. Documentos entram nos próximos 30 dias; revisões, a 500 km; peças,
+a 1.000 km. Vencidos e vencendo hoje são destacados e aparecem primeiro. Datas
+seguem o calendário de Brasília, inclusive nos dispositivos em outro fuso.
+Alertas são calculados dos registros cadastrados: datas ausentes/inválidas e
+revisões sem quilometragem programada não geram vencimentos. A central é do
+gestor; o motorista continua limitado aos dados permitidos pelo banco.
+
+Filtre a central por categoria/prioridade e use **Ver veículo** ou **Ver motoristas**
+para tratar uma pendência. A validade de CNH pode ser corrigida em Motoristas
+com **Atualizar CNH**. Os vencimentos se atualizam ao salvar, carregar os dados,
+voltar para a aba ou a cada minuto enquanto a sessão está aberta. Não há envio
+automático de e-mails, WhatsApp ou notificações fora do aplicativo.
+
+Em **Veículos**, busque placa, modelo ou motorista atual, com ou sem acentos e
+hífens. Combine com situação (disponível, em uso, com vencimentos) e motorista
+que está utilizando o veículo. **Com vencimentos** usa os prazos/quilometragens
+da central; o aviso de consumo anormal continua nos cartões/painel. Os filtros
+mostram a contagem de resultados, preservam formulários em edição e podem ser
+limpos. São locais à sessão e não alteram a frota nem ficam na próxima conta.
+Esta atualização não exige migração SQL adicional.
