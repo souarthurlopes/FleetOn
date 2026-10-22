@@ -107,7 +107,7 @@ projeto Supabase real.
 ## Dados, contas e sincronização
 
 Cada conta nova começa como **gestor da própria frota**, sem acesso às demais.
-O gestor abre **Minha conta → Equipe** e convida motoristas pelo e-mail.
+O gestor abre **Meu perfil → Equipe** e convida motoristas pelo e-mail.
 O motorista cria uma conta com esse mesmo e-mail, confirma o cadastro e aceita
 explicitamente o convite exibido ao entrar. O convite fica no aplicativo; não
 envia e-mail automaticamente. Nesta versão, uma conta participa de uma frota.
@@ -125,7 +125,7 @@ veículo com o motorista. Uma edição após revogação é negada no banco mesm
 outra aba ainda exiba a interface antiga. O gestor ainda pode usar uma prévia da
 visão do motorista, que não altera suas permissões.
 
-**Minha conta → Meu perfil** permite salvar nome e foto JPEG compactada de
+**Meu perfil** permite salvar nome e foto JPEG compactada de
 128×128 por usuário, separados dos dados da frota e protegidos pelas funções de
 banco. Essas informações acompanham o login nos dispositivos e não ficam em
 metadados de autenticação/tokens. A foto original pode ter até 5 MB; o resultado
@@ -136,7 +136,7 @@ conta motorista ficam identificadas com usuário e nome nos registros de viagem.
 
 Para instalações já publicadas, execute **002_profiles_roles.sql** no SQL Editor.
 Até a atualização, o aplicativo continua no modelo anterior (conta individual) e
-indica em Minha conta que perfis/equipe estão pendentes. Não declare permissões
+indica em Meu perfil que perfis/equipe estão pendentes. Não declare permissões
 implantadas antes de aplicar a atualização no banco real.
 
 O SDK oficial gerencia a sessão e a renovação de tokens. No Supabase, os tokens
@@ -190,3 +190,14 @@ sua frota isolada como gestor. A versão local guarda dados em
 é preservado e ignorado pelo Git. Não confunda esse servidor local com o build
 estático de produção. Para backup completo, use a API de backup do SQLite;
 com WAL ativo, copiar somente o arquivo principal pode perder alterações.
+
+## Interface e navegação
+
+No computador, a barra lateral reúne a marca, as seções da frota e o perfil.
+**Meu perfil** abre os dados pessoais, backup/importação e a equipe do gestor
+em uma área própria. No celular, o botão de menu abre a navegação; toque fora
+ou pressione Escape para fechar. O botão de tema no cabeçalho alterna claro/escuro
+e guarda a escolha no dispositivo. As transições respeitam movimento reduzido.
+A identidade do usuário e as permissões continuam determinadas pelo banco.
+Alterações visuais são publicadas pelo build/deploy do Cloudflare, sem migração
+SQL adicional.

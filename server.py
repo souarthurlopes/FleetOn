@@ -126,7 +126,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', str(len(raw)))
             self.end_headers()
             return self.wfile.write(raw)
-        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css'}
+        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css', '/layout.js':'layout.js', '/layout.css':'layout.css'}
         if path not in files:
             return self.reply(404, {'error': 'Não encontrado.'})
         target = ROOT / 'public' / files[path]

@@ -27,6 +27,7 @@ function paintAccount(session,context) {
   ${manager?'<section class="panel"><h2>Dados da frota</h2><button class="btn sec" id="backup">Exportar backup</button><label>Importar backup (JSON)<input id="import" type="file" accept="application/json,.json"></label><p class="settings-help">Para importar, a frota precisa estar vazia.</p></section>':''}
   ${manager && window.FleetOnRemote?.enabled?'<section class="panel"><h2>Equipe</h2><form id="invite-form"><label>E-mail do motorista<input id="invite-email" type="email" required maxlength="254"></label><button class="btn" type="submit">Convidar motorista</button></form><p class="settings-help">O motorista cria a conta, confirma o e-mail e aceita o convite ao entrar. Nenhum e-mail é enviado por este botão.</p><p id="team-status" role="status"></p><div id="team-list"></div></section>':''}
   </div></details><div id="invite-notice"></div>`;
+  layoutAccount();
   profileDisplay(session,context);
   const input=document.querySelector('#edit-name');input.value=context.profile?.name||session.email.split('@')[0];
   if(context.migrationRequired) {

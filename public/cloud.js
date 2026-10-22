@@ -37,6 +37,7 @@ async function saveCloud() {
   }
 }
 function authScreen() {
+  layoutSignedOut();
   document.querySelector('#workspace').hidden=true;
   account.innerHTML=`<div class="panel" style="max-width:440px;margin:40px auto"><h2>Acesse sua frota</h2>
   <p>Entre com a mesma conta em outros dispositivos para acessar seus dados.</p>
@@ -81,6 +82,7 @@ async function enter(session) {
   document.querySelector('#workspace').hidden=false;
   document.querySelector('#workspace').inert=false;
   syncStatus.textContent='Dados carregados do servidor.';
+  layoutSignedIn();
   if(document.querySelector('#backup'))document.querySelector('#backup').onclick=exportBackup;
   document.querySelector('#logout').onclick=async()=>{
     if(cloud.busy) return;
@@ -109,6 +111,7 @@ async function enter(session) {
 }
 window.addEventListener('beforeunload',event=>{if(cloud.dirty){event.preventDefault();event.returnValue='';}});
 function recoveryScreen() {
+  layoutSignedOut();
   document.querySelector('#workspace').hidden=true;
   account.innerHTML=`<div class="panel"><h2>Crie uma nova senha</h2><form id="recovery-form"><label>Nova senha<input id="new-password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label><button class="btn" type="submit">Salvar senha</button><p id="recovery-error" role="alert"></p></form></div>`;
   document.querySelector('#recovery-form').onsubmit=async event=>{

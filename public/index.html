@@ -105,8 +105,19 @@ body.mot .tabs,body.mot .gonly{display:none!important}
 @media (max-width:600px){.cmp{grid-template-columns:1fr}}
 @media print{.tabs,.seg,.note,.btn{display:none!important}main{padding:0}section[hidden]{display:none}.print-only{display:block}*{color:#0f1e3d!important;background:#fff!important}.bar,.hb{background:#2b7de9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
+<link rel="stylesheet" href="/layout.css">
 </head>
 <body>
+<aside class="app-sidebar" id="app-sidebar" aria-label="Menu principal" hidden>
+ <div class="sidebar-brand" id="sidebar-brand"></div>
+ <p class="nav-caption">ESPAÇO DE TRABALHO</p>
+ <nav id="sidebar-navigation" aria-label="Seções da frota"></nav>
+ <button type="button" class="sidebar-link driver-link" id="driver-navigation">Veículos</button>
+ <div class="sidebar-divider"></div>
+ <button type="button" class="sidebar-link" id="profile-navigation">Meu perfil</button>
+ <div class="sidebar-bottom"><button type="button" id="account-shortcut" class="account-shortcut" aria-label="Abrir meu perfil"></button><div id="sidebar-signout"></div><p class="sidebar-tagline">Gestão em movimento.</p></div>
+</aside>
+<button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Fechar menu" hidden></button>
 <main>
 <div id="account"></div><p id="sync-status" role="status" aria-live="polite"></p><div id="workspace" hidden>
 <h1>Controle de Frota</h1>
@@ -281,6 +292,7 @@ document.addEventListener('click',async e=>{
     if(k>v.km)v.km=k;if(tp==='Troca de óleo'||tp==='Revisão')v.prox=v.km+10000;
     S.log.push({quando:hoje(),t:Date.now(),placa:v.placa,tipo:tp,km:k||0,litros:Number($('#ll').value)||0,det:(k?fmt(k)+' km. ':'')+$('#lo').value,valor:Number($('#lv').value)||0});note='Registro salvo.'}}
   await save();render();
+  if(a==='modo')navigateLayout('car');
   if(a==='gest'&&S.role==='ges')$('.tab[data-t="dash"]').click();
   } finally {cloud.busy=false; $('#workspace').inert=cloud.blocked;}
 });
@@ -292,6 +304,7 @@ $('h1').innerHTML='<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAA
 <script src="/vendor/supabase.js"></script>
 <script src="/supabase-adapter.js"></script>
 <script src="/account.js"></script>
+<script src="/layout.js"></script>
 <script src="/cloud.js"></script>
 </body>
 </html>

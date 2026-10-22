@@ -73,7 +73,7 @@ try:
         page.locator('#reset-password').click();page.get_by_text('Se o endereço estiver cadastrado',exact=False).wait_for()
         page.locator('#password').fill('test-password-123');page.get_by_role('button',name='Entrar',exact=True).click();page.locator('#user-email').wait_for()
         assert not page.locator('#account-settings').evaluate('(e)=>e.open')
-        page.locator('#account-settings > summary').click()
+        page.locator('#profile-navigation').click()
         page.locator('#edit-name').fill('Ana Lopes')
         image=page.evaluate("(()=>{const c=document.createElement('canvas');c.width=c.height=10;c.getContext('2d').fillRect(0,0,10,10);return c.toDataURL('image/png').split(',')[1]})()")
         page.locator('#edit-avatar').set_input_files({'name':'avatar.png','mimeType':'image/png','buffer':base64.b64decode(image)})
@@ -82,12 +82,30 @@ try:
         assert profile_context['profile']['avatar'].startswith('data:image/jpeg;base64,')
         page.locator('#invite-email').fill('driver@example.com');page.get_by_role('button',name='Convidar motorista',exact=True).click()
         page.get_by_text('driver@example.com · Convite pendente',exact=True).wait_for()
-        page.locator('#account-settings > summary').click()
-        page.screenshot(path='/tmp/fleeton-profile.png',full_page=True)
+        page.locator('[data-t="dash"]').click()
+        assert page.locator('#profile-navigation').get_attribute('aria-current')=='false'
+        page.screenshot(path='/tmp/fleeton-profile.png',full_page=True,animations='disabled')
         page.locator('[data-t="car"]').click();page.locator('#np').fill('CLOUD123');page.locator('#nm').fill('Nuvem');page.locator('#nk').fill('100');page.locator('#nr').fill('10000');page.locator('[data-go="add:0"]').click()
         page.get_by_text('Salvo no servidor.',exact=True).wait_for()
         assert fleet['state']['cars'][0]['placa']=='CLOUD123'
         page.reload();page.locator('#user-email').wait_for();page.locator('[data-t="car"]').click();assert page.locator('.plate').inner_text()=='CLOUD123'
+        page.set_viewport_size({'width':390,'height':844})
+        assert page.locator('#app-sidebar').evaluate('(e)=>e.inert')
+        page.locator('#menu-toggle').click();page.locator('#profile-navigation').click()
+        assert page.locator('#account-settings').is_visible()
+        assert page.locator('#workspace').is_hidden()
+        assert page.locator('#page-title').inner_text()=='Meu perfil'
+        page.screenshot(path='/tmp/fleeton-mobile.png',full_page=True,animations='disabled')
+        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+        page.locator('.theme-toggle').click();assert page.locator('html').get_attribute('data-theme')=='dark'
+        page.screenshot(path='/tmp/fleeton-mobile-dark.png',full_page=True,animations='disabled')
+        page.locator('#menu-toggle').click();page.keyboard.press('Escape')
+        assert page.locator('#menu-toggle').get_attribute('aria-expanded')=='false'
+        page.locator('#menu-toggle').click();page.locator('[data-t="car"]').click()
+        assert page.locator('#workspace').is_visible()
+        page.set_viewport_size({'width':1280,'height':720})
+        assert not page.locator('#app-sidebar').evaluate('(e)=>e.inert')
+        page.locator('.theme-toggle').click()
         fleet['version']+=1
         page.locator('#np').fill('STALE123');page.locator('#nm').fill('Conflito');page.locator('[data-go="add:0"]').click()
         page.get_by_text('A frota mudou em outro dispositivo.',exact=False).wait_for();assert page.locator('#workspace').evaluate('(e)=>e.inert')
