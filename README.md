@@ -18,8 +18,9 @@ Nenhum serviço foi criado ou publicado automaticamente por este repositório.
 2. Abra **SQL Editor**, copie o conteúdo completo de
    [`supabase/001_fleeton.sql`](supabase/001_fleeton.sql) e execute.
    Depois execute também [`supabase/002_profiles_roles.sql`](supabase/002_profiles_roles.sql)
-   para habilitar os perfis e as permissões. As migrações podem ser reaplicadas
-   na ordem 001 → 002 sem apagar os dados. Se já executou 001, basta executar 002.
+   para habilitar os perfis e as permissões. Para o checklist dos motoristas,
+   execute também [`supabase/003_inspection.sql`](supabase/003_inspection.sql). As migrações podem ser reaplicadas
+   na ordem 001 → 002 → 003 sem apagar os dados. Se já executou 001 e 002, execute apenas 003 para esta etapa.
 3. Em **Project Settings → API** (ou **API Keys**), copie a **Project URL** e a
    chave **publishable** (`sb_publishable_...`) ou a chave legada **anon**.
    São configurações públicas. Nunca use `service_role`, `sb_secret_...` ou a
@@ -226,3 +227,44 @@ da central; o aviso de consumo anormal continua nos cartões/painel. Os filtros
 mostram a contagem de resultados, preservam formulários em edição e podem ser
 limpos. São locais à sessão e não alteram a frota nem ficam na próxima conta.
 Esta atualização não exige migração SQL adicional.
+
+## Checklist com fotos e comparação
+
+Na retirada/devolução, informe combustível e estado de lataria/vidros, interior,
+pneus, luzes e equipamentos. Cada item pode ficar como **Sem avaria**, **Com
+avaria** ou **Não conferido**. Nenhum item é considerado conferido por padrão.
+Se houver avaria, descreva-a nas observações. Confirme as informações antes de
+registrar a etapa. É possível anexar até quatro fotos: frente, traseira e laterais.
+No celular, o seletor favorece a câmera traseira; conforme o navegador, também
+é possível escolher uma imagem existente. As fotos são opcionais e têm prévia,
+remoção e ampliação. Imagens inválidas não são descartadas silenciosamente: o
+registro exige substituir ou remover o arquivo com erro.
+
+Cada imagem original pode ter até 10 MB. O aplicativo reencoda em JPEG de até
+64 KiB, reduzindo resolução/qualidade. As imagens ficam no documento da frota,
+não no Supabase Storage, e contam para o limite total de 8 MB por conta. A primeira
+foto também serve como miniatura legada. Não é um arquivo dos originais em alta
+resolução. Mantenha backups; para uso prolongado/intensivo de fotos, será necessário
+migrar a mídia para Storage antes de atingir o limite.
+
+**Histórico → Comparar fotos** (ícone de duas colunas na devolução) mostra os itens,
+o combustível e as imagens por etapa. Mudanças são destacadas para conferência
+humana, sem detecção automática de avarias ou atribuição de responsabilidade.
+Novas viagens têm identificador próprio para evitar combinar registros diferentes.
+Fotos e observações antigas continuam acessíveis, mesmo sem checklist estruturado.
+O gestor pode comparar o histórico completo; o motorista vê, na devolução, o
+resumo das condições da retirada, sem acesso ao histórico financeiro da frota.
+
+Execute **003_inspection.sql** no SQL Editor após as migrações anteriores. Ela
+valida o checklist e mantém as verificações de identidade, versão e quilometragem,
+revogando o endpoint antigo para impedir que o motorista pule a validação. Não
+apaga os dados existentes. Se estiver voltando de uma viagem iniciada antes desta
+atualização, o novo checklist pode ser usado; a etapa anterior aparece como registro
+legado. A nova interface exige essa migração para confirmar viagens de motorista;
+o gestor continua salvando pelo fluxo completo da frota. A migração foi testada
+localmente; a ativação no projeto real exige executá-la no Supabase.
+
+Validação adicional: `python3 tests/browser_inspection.py` usa banco SQLite
+temporário, fotos de teste e navegador real para verificar campos obrigatórios,
+compactação, erros de imagem, persistência e comparação no computador/celular.
+`npm test` também verifica o fluxo de motorista no PostgreSQL com as três migrações.

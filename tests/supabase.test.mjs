@@ -85,3 +85,46 @@ test('Perfis e equipe: motorista não se promove, acessa outra frota ou altera f
   assert.equal((await call('fleeton_context')).profile.name,'Gestor');assert.equal((await call('fleeton_get_fleet')).state.cars[0].km,125);
  }finally{await db.close();}
 });
+
+test('Checklist do motorista é obrigatório, versionado e preserva as fotos e a identidade da viagem',async()=>{
+ const db=new PGlite(),manager='11111111-1111-1111-1111-111111111111',driver='22222222-2222-2222-2222-222222222222',other='33333333-3333-3333-3333-333333333333';
+ const identity=uid=>db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);
+ const call=async(fn,args=[])=> (await db.query(`select public.${fn}(${args.map((_,i)=>'$'+(i+1)).join(',')}) as result`,args)).rows[0].result;
+ const checklist={version:1,fuel:'Cheio',items:{exterior:'ok',interior:'not_checked',tires:'ok',lights:'ok',equipment:'ok'},notes:'',photos:{front:'data:image/jpeg;base64,AAAA'},confirmed:true};
+ try{
+  await db.exec(`create role anon;create role authenticated;create schema auth;grant usage on schema auth to authenticated,anon;
+   create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
+   create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;`);
+  await db.query('insert into auth.users values($1,$2,now()),($3,$4,now()),($5,$6,now())',[manager,'manager@test.com',driver,'driver@test.com',other,'other@test.com']);
+  for(const file of ['001_fleeton.sql','002_profiles_roles.sql','003_inspection.sql'])await db.exec(await readFile(new URL('../supabase/'+file,import.meta.url),'utf8'));
+  await db.exec('set role anon');await assert.rejects(call('fleeton_driver_inspection',[0,1,'out',null,'Destino',JSON.stringify(checklist)]),/permission denied/);
+  await db.exec('set role authenticated');await identity(manager);await call('fleeton_context');await call('fleeton_get_fleet');
+  await call('fleeton_save_fleet',[0,JSON.stringify({cars:[{id:1,placa:'ABC1234',modelo:'Teste',km:100,prox:10000,uso:null}],drivers:[],log:[],fines:[]})]);
+  await call('fleeton_team',['invite','driver@test.com']);await call('fleeton_team',['invite','other@test.com']);
+  await identity(other);await call('fleeton_accept_invite');await identity(driver);await call('fleeton_accept_invite');
+  await assert.rejects(call('fleeton_driver_trip',[1,1,'out',null,'Destino','','']),/permission denied/);
+  await assert.rejects(call('fleeton_driver_inspection',[1,1,'out',null,'Destino',JSON.stringify({...checklist,confirmed:false})]),/INSPECTION_INVALID/);
+  assert.equal((await call('fleeton_get_fleet')).version,1);
+  let fleet=await call('fleeton_driver_inspection',[1,1,'out',null,'Destino',JSON.stringify(checklist)]);
+  assert.equal(fleet.version,2);assert.equal(fleet.state.log.length,0);assert.equal(fleet.state.cars[0].uso.inspection_summary.fuel,'Cheio');
+  await identity(other);await assert.rejects(call('fleeton_driver_inspection',[2,1,'in',125,'',JSON.stringify(checklist)]),/FLEET_FORBIDDEN/);
+  await identity(driver);await assert.rejects(call('fleeton_driver_inspection',[1,1,'in',125,'',JSON.stringify(checklist)]),/FLEET_CONFLICT/);
+  const end={...checklist,fuel:'1/2',items:{...checklist.items,tires:'damage'},notes:'Pneu traseiro com dano',photos:{rear:'data:image/jpeg;base64,BBBB'}};
+  fleet=await call('fleeton_driver_inspection',[2,1,'in',125,'',JSON.stringify(end)]);assert.equal(fleet.version,3);assert.equal(fleet.state.cars[0].uso,null);
+  await identity(manager);fleet=await call('fleeton_get_fleet');
+  assert.equal(fleet.state.log.length,2);assert.deepEqual(fleet.state.log[0].inspection,checklist);assert.deepEqual(fleet.state.log[1].inspection,end);
+  assert.equal(fleet.state.log[0].trip_id,fleet.state.log[1].trip_id);assert.equal(fleet.state.log[1].user_id,driver);assert.equal(fleet.state.log[1].rodou,25);
+  await assert.rejects(call('fleeton_driver_inspection',[3,1,'out',null,'Destino',JSON.stringify(checklist)]),/FLEET_FORBIDDEN/);
+  await identity(driver);await assert.rejects(call('fleeton_driver_inspection',[3,1,'out',null,'Destino',JSON.stringify({...checklist,photos:{front:'data:image/jpeg;base64,'+'A'.repeat(65536)}})]),/INSPECTION_INVALID/);
+  await db.exec('reset role');await db.exec(await readFile(new URL('../supabase/003_inspection.sql',import.meta.url),'utf8'));await db.exec('set role authenticated');await identity(manager);
+  assert.equal((await call('fleeton_get_fleet')).state.log.length,2);
+  // A failure after the old trip operation must roll back its log, use and version.
+  const almostFull={cars:[{id:1,placa:'ABC1234',modelo:'Teste',km:125,prox:10000,uso:null}],drivers:[],log:[{tipo:'Nota',placa:'ABC1234',det:'x'.repeat(8388608-210000),quando:'Hoje'}],fines:[]};
+  await call('fleeton_save_fleet',[3,JSON.stringify(almostFull)]);
+  const image='data:image/jpeg;base64,'+'A'.repeat(60000);
+  await identity(driver);
+  await assert.rejects(call('fleeton_driver_inspection',[4,1,'out',null,'Destino',JSON.stringify({...checklist,photos:{front:image,rear:image,left:image,right:image}})]),/FLEET_TOO_LARGE/);
+  await identity(manager);fleet=await call('fleeton_get_fleet');
+  assert.equal(fleet.version,4);assert.equal(fleet.state.cars[0].uso,null);assert.equal(fleet.state.log.length,1);
+ }finally{await db.close();}
+});

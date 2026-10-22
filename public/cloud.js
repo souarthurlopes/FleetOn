@@ -87,12 +87,14 @@ async function enter(session) {
   if(document.querySelector('#backup'))document.querySelector('#backup').onclick=exportBackup;
   document.querySelector('#logout').onclick=async()=>{
     if(cloud.busy) return;
+    if(hasInspectionDraft()&&!confirm('O checklist em edição ainda não foi registrado. Sair descarta essas informações. Deseja continuar?'))return;
     if(cloud.dirty && !confirm('Há alterações não salvas. Exporte um backup antes de sair. Deseja sair mesmo assim?')) return;
     try {await api('logout',{}); cloud.context=null; resetView({cars:[],drivers:[],log:[],fines:[]}); cloud.csrf=''; cloud.dirty=false; syncStatus.textContent=''; authScreen();}
     catch(error){syncStatus.textContent=error.message;}
   };
   document.querySelector('#refresh').onclick=async()=>{
     if(cloud.busy) return;
+    if(hasInspectionDraft()&&!confirm('Atualizar descarta o checklist em edição. Deseja continuar?'))return;
     if(cloud.dirty && !confirm('Atualizar descarta as alterações não salvas. Já exportou o backup e deseja continuar?')) return;
     try{await enter(await api('session'));}catch(error){syncStatus.textContent=error.message;}
   };
@@ -110,7 +112,7 @@ async function enter(session) {
     finally{cloud.busy=false; event.target.value='';}
   };
 }
-window.addEventListener('beforeunload',event=>{if(cloud.dirty){event.preventDefault();event.returnValue='';}});
+window.addEventListener('beforeunload',event=>{if(cloud.dirty||hasInspectionDraft()){event.preventDefault();event.returnValue='';}});
 function recoveryScreen() {
   layoutSignedOut();
   document.querySelector('#workspace').hidden=true;
@@ -137,7 +139,10 @@ window.addEventListener('fleeton-recovery',recoveryScreen);
 
 async function driverTrip(action,car) {
   try {
-    const fleet=await api('trip',{p_version:cloud.version,p_car_id:car.id,p_action:action,p_km:action==='in'?Number(document.querySelector('#kmf').value):null,p_destination:action==='out'?document.querySelector('#dest').value.trim():'',p_condition:document.querySelector('#comb').value+', '+document.querySelector('#av').value,p_photo:await foto()});
+    const km=action==='in'?FleetInspection.returnKm(document.querySelector('#kmf').value,car.km):null;
+    if(action==='in'&&km===null)throw new Error('Informe uma quilometragem final igual ou maior que a atual.');
+    const inspection=await readInspection();
+    const fleet=await api('inspectionTrip',{p_version:cloud.version,p_car_id:car.id,p_action:action,p_km:km,p_destination:action==='out'?document.querySelector('#dest').value.trim():'',p_checklist:inspection});
     cloud.version=fleet.version;resetView(fleet.state);cloud.lastState=JSON.stringify(stateOnly());syncStatus.textContent='Viagem registrada.';
   }catch(error){syncStatus.textContent=error.message;}
 }
