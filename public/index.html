@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FleetOn</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
+<style>
+:root{--bg:#f3f8fc;--surface:#fff;--ink:#16324f;--muted:#7088a3;--line:#e3edf6;--accent:#2b7de9;--accent-ink:#fff;--warn:#e8890c;--ok:#2bb08a;--use:#2b7de9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1a26;--surface:#132434;--ink:#e6f0f8;--muted:#8aa3b8;--line:#243a4d;--accent:#5aa2ff;--accent-ink:#08121c;--warn:#f5b04c;--ok:#54cfa8;--use:#5aa2ff}}
+:root[data-theme="dark"]{--bg:#0d1a26;--surface:#132434;--ink:#e6f0f8;--muted:#8aa3b8;--line:#243a4d;--accent:#5aa2ff;--accent-ink:#08121c;--warn:#f5b04c;--ok:#54cfa8;--use:#5aa2ff}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 Barlow,system-ui,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 32px/1 'Barlow Condensed',Barlow,sans-serif;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+.stat b{display:block;font:700 28px/1 'Barlow Condensed',sans-serif}
+.stat span{color:var(--muted);font-size:14px}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:16px}
+.tab{background:none;border:0;padding:10px 14px;font:600 16px Barlow,sans-serif;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.car{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--ok);border-radius:6px;padding:14px}
+.car.uso{border-left-color:var(--use)}.car.rev{border-left-color:var(--warn)}
+.plate{font:700 26px/1 'Barlow Condensed',sans-serif;letter-spacing:.06em}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.badge{font-size:13px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.livre{color:var(--ok)}.emuso{color:var(--use)}.alerta{color:var(--warn)}
+.meta{color:var(--muted);font-size:14px;margin:6px 0 10px}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:5px;padding:9px 14px;font:600 15px Barlow,sans-serif;cursor:pointer}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:14px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+input,select{font:400 16px Barlow,sans-serif;padding:9px;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--ink);width:100%}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-size:15px}
+th{color:var(--muted);font-weight:600}
+.empty{color:var(--muted);padding:24px;text-align:center}
+.thumb{height:40px;border-radius:4px;vertical-align:middle}.note{color:var(--warn);font-weight:600;min-height:1.4em;margin:0 0 8px}.msg{color:var(--ok);font-weight:600;margin:8px 0 0;min-height:1.4em}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}.dgrid .panel{margin:0}.dgrid h2{font:700 20px/1 'Barlow Condensed',sans-serif;margin:0 0 10px}.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:12px}.kpi{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:6px;padding:12px}.kpi b{display:block;font:700 30px/1.1 'Barlow Condensed',sans-serif}.kpi span{color:var(--muted);font-size:14px}.bars{display:flex;gap:10px;align-items:flex-end;height:170px}.bc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-size:13px;color:var(--muted)}.bar{width:100%;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px}.hr{display:grid;grid-template-columns:86px 1fr 84px;gap:8px;align-items:center;margin:8px 0;font-size:14px}.ht{background:var(--bg);height:10px;border-radius:5px}.hb{background:var(--accent);height:100%;border-radius:5px}.hr b{text-align:right}.li{padding:6px 0;border-bottom:1px solid var(--line);font-size:15px}.li:last-child{border:0}
+@media (max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+:root *{font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:1040px;padding:32px 20px 56px}
+h1{font-size:26px;font-weight:600;letter-spacing:-.02em}
+.stat,.kpi,.panel,.car{border:0;border-radius:14px;box-shadow:0 1px 3px rgba(15,30,61,.06)}
+.stat b,.kpi b{font-weight:600;letter-spacing:-.02em}
+.car.uso{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.car.rev{box-shadow:inset 0 0 0 1.5px var(--warn)}
+.tabs{border:0;gap:6px;flex-wrap:wrap}
+.tab{border-radius:99px;padding:8px 16px;margin:0;font-size:15px;font-weight:500;border:0}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.plate{font-size:21px;font-weight:600;letter-spacing:.04em}
+.btn{border-radius:99px;padding:9px 18px;font-weight:500}
+.btn.sec{border:0;background:var(--line);color:var(--ink)}
+.badge{border:0;font-weight:500;background:color-mix(in srgb,currentColor 12%,transparent)}
+.dgrid h2{font-size:16px;font-weight:600}
+input,select{border-radius:10px;background:var(--surface)}
+th{font-weight:500}
+.bar{border-radius:6px 6px 0 0}
+.livre{color:var(--ok)}.alerta{color:var(--warn)}
+.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+body{background:var(--surface)}
+.kpi,.panel,.car{background:var(--bg);box-shadow:none}
+h1{display:flex;align-items:center;gap:10px;font-size:20px;margin:0 0 20px}
+h1 .ic{width:26px;height:26px;color:var(--accent)}
+.tab{display:inline-flex;align-items:center;gap:7px;background:none;color:var(--muted)}
+.tab[aria-selected="true"]{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:6px}
+.btn .ic{width:16px;height:16px}
+.btn.ico{background:none;color:var(--muted);padding:8px}
+.badge{display:inline-flex;align-items:center;gap:5px}.badge .ic{width:14px;height:14px}
+.kpi span{display:flex;align-items:center;gap:6px}.kpi span .ic{width:16px;height:16px;color:var(--accent)}
+@media (max-width:600px){.tab span{display:none}.tab[aria-selected="true"] span{display:inline}}
+.seg{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}.seg-b{border:0;background:var(--bg);color:var(--muted);padding:6px 14px;border-radius:99px;font-size:14px;cursor:pointer}.seg-b[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}.kpi em{display:block;font-size:13px;font-style:normal;color:var(--muted);margin-top:2px}.print-only{display:none}
+body{font-weight:300;letter-spacing:.005em}
+main{max-width:1000px;padding:40px 24px 72px}
+.ic{stroke-width:1.5}
+h1{font-size:22px;font-weight:300;letter-spacing:-.01em;margin:0 0 28px;gap:12px}
+h1 b{font-weight:600;color:var(--accent)}
+h1 .ic{width:30px;height:30px}
+.tabs{gap:2px;margin-bottom:28px}
+.tab{font-weight:400;padding:8px 14px}
+.kpi,.panel,.car{border-radius:18px;padding:18px}
+.kpi b{font-weight:300;font-size:32px}
+.car,.panel{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
+.car.uso{box-shadow:inset 0 0 0 1px var(--accent)}
+.car.rev{box-shadow:inset 0 0 0 1px var(--warn)}
+.plate{font-weight:500;letter-spacing:.08em;font-size:19px}
+.grid,.dgrid{gap:18px}.kpis{gap:14px;margin-bottom:18px}
+.btn{font-weight:400}.dgrid h2{font-weight:500}th{font-weight:400}b{font-weight:500}
+body.mot .tabs,body.mot .gonly{display:none!important}
+.pcrow{display:grid;gap:8px;align-items:end;margin-top:10px}.pcrow small{font-size:13px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}.cmp img{width:100%;border-radius:12px;display:block;margin-top:6px}.cmp p{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.role{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin:0 0 16px;flex-wrap:wrap}.role input{width:170px;padding:6px 10px}
+@media (max-width:600px){.cmp{grid-template-columns:1fr}}
+@media print{.tabs,.seg,.note,.btn{display:none!important}main{padding:0}section[hidden]{display:none}.print-only{display:block}*{color:#0f1e3d!important;background:#fff!important}.bar,.hb{background:#2b7de9!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<main>
+<div id="account"></div><p id="sync-status" role="status" aria-live="polite"></p><div id="workspace" hidden>
+<h1>Controle de Frota</h1>
+
+
+<div class="role" id="role"></div>
+<p class="note" id="note" role="status"></p>
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" data-t="dash" aria-selected="true">Painel</button>
+  <button class="tab" role="tab" data-t="car" aria-selected="false">Veículos</button>
+  <button class="tab" role="tab" data-t="drv" aria-selected="false">Motoristas</button>
+  <button class="tab" role="tab" data-t="log" aria-selected="false">Abastecimento e manutenção</button>
+  <button class="tab" role="tab" data-t="fin" aria-selected="false">Multas</button>
+  <button class="tab" role="tab" data-t="hist" aria-selected="false">Histórico</button>
+</div>
+<section id="dash"></section><section id="car" hidden></section><section id="drv" hidden></section><section id="log" hidden></section><section id="fin" hidden></section><section id="hist" hidden></section>
+</div></main>
+<script>
+const KEY='frota-v1';
+let S={cars:[],log:[],drivers:[]};
+S.fines=[];S.role='ges';
+let open=null,docOpen=null,note='',ed=null,cmp=null,pcOpen=null,rvOpen=null,pend={k:'',t:0};
+const pending=k=>pend.k===k&&Date.now()-pend.t<6000;
+const ask=(k,m)=>{if(pending(k)){pend={k:'',t:0};return true}pend={k,t:Date.now()};note=m;return false};
+const $=s=>document.querySelector(s);
+const fmt=n=>Number(n).toLocaleString('pt-BR');
+const hoje=()=>new Date().toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dias=d=>Math.ceil((new Date(d+'T23:59:59')-Date.now())/864e5);
+const venc=(nome,d)=>{if(!d)return '';const n=dias(d);return n<0?nome+' vencido':n<=30?nome+' vence em '+n+' dia'+(n===1?'':'s'):''};
+const revisao=c=>c.prox-c.km<=500;
+function anom(c){const f=S.log.filter(l=>l.placa===c.placa&&l.litros&&l.km).sort((a,b)=>a.km-b.km);if(f.length<4)return '';const v=f.slice(1).map((x,i)=>(x.km-f[i].km)/x.litros),u=v.pop(),m=v.reduce((a,b)=>a+b,0)/v.length;return u<m*.75?'Consumo '+u.toFixed(1).replace('.',',')+' km/l, '+Math.round((1-u/m)*100)+'% abaixo da média':''}
+const PN=['Pneus','Bateria','Pastilhas'],PV=[40000,50000,30000];
+const pecAl=c=>(c.pecas||[]).map((p,i)=>{if(!p||p.troca==null||!p.vida)return '';const r=p.troca+p.vida-c.km;return r<=0?PN[i]+': troca vencida':r<=1000?PN[i]+': troca em '+fmt(r)+' km':''});
+function pcForm(c){const p=c.pecas||[];return `<div style="margin-top:8px">${PN.map((n,i)=>{const x=p[i]||{},r=x.troca!=null&&x.vida?x.troca+x.vida-c.km:null;return `<div class="pcrow" style="grid-template-columns:1fr 1fr auto"><label>${n}: última troca (km)<input id="pt${i}" type="number" value="${esc(x.troca??'')}"></label><label>Vida útil (km)<input id="pv${i}" type="number" value="${esc(x.vida??PV[i])}"></label><button class="btn sm sec" data-go="troca:${c.id}:${i}">Trocou agora</button>${r!=null?`<small style="grid-column:1/-1;color:${r<=1000?'var(--warn)':'var(--muted)'}">${r>0?'Faltam '+fmt(r)+' km':'Troca vencida há '+fmt(-r)+' km'}</small>`:''}</div>`}).join('')}<div class="form" style="margin-top:10px"><button class="btn sm" data-go="svpec:${c.id}">Salvar</button><button class="btn sm sec" data-go="cancel:0">Fechar</button></div></div>`}
+function drvAt(p,t){let c=null,u=null;S.log.filter(l=>l.placa===p&&(l.tipo==='Saída'||l.tipo==='Devolução')).sort((a,b)=>a.t-b.t).forEach(l=>{if(l.t>t)return;if(l.tipo==='Saída')c=l.det.split(' → ')[0];else{u={n:l.det.split(' rodou ')[0],t:l.t};c=null}});return c||(u&&t-u.t<432e5?u.n:null)}
+function cmpView(){if(cmp==null||!S.log[cmp])return '';const d=S.log[cmp];let s=null;for(let j=cmp-1;j>=0;j--)if(S.log[j].placa===d.placa&&S.log[j].tipo==='Saída'){s=S.log[j];break}
+  const cell=(t,l)=>`<div><b>${t}</b>${l&&l.foto?`<img src="${esc(l.foto)}" alt="Foto da ${t.toLowerCase()}">`:'<div class="empty">Sem foto</div>'}<p>${l?esc(l.quando)+' · '+esc(l.det):'Saída não encontrada'}</p></div>`;
+  return `<div class="panel" style="margin-bottom:14px"><div class="row" style="margin-bottom:10px"><h2 style="margin:0;font-size:16px">${esc(d.placa)}: saída e devolução</h2><button class="btn sm sec" data-go="cancel:0">Fechar</button></div><div class="cmp">${cell('Saída',s)}${cell('Devolução',d)}</div></div>`}
+function rolebar(){document.body.classList.toggle('mot',S.role==='mot');$('#role').innerHTML=S.role==='mot'?`<button class="btn sm sec" data-go="gest:0">Voltar à visão do gestor</button>`:`<button class="btn sm sec" data-go="modo:0">Visão do motorista</button>`;if(S.role==='mot'){['dash','drv','log','fin','hist'].forEach(i=>$('#'+i).hidden=true);$('#car').hidden=false}}
+
+const alertas=c=>[anom(c),...pecAl(c),revisao(c)?'Revisão aos '+fmt(c.prox)+' km':'',venc('IPVA',c.ipva),venc('Revisão',c.revdata),venc('Licenciamento',c.lic),venc('Seguro',c.seg)].filter(Boolean);
+const save=()=>saveCloud();
+function cons(c){const f=S.log.filter(l=>l.placa===c.placa&&l.litros&&l.km).sort((a,b)=>a.km-b.km);if(f.length<2)return null;const L=f.slice(1).reduce((t,x)=>t+x.litros,0);return L?(f[f.length-1].km-f[0].km)/L:null}
+function custoMes(c){const n=new Date();return S.log.filter(l=>l.placa===c.placa&&l.valor&&new Date(l.t).getMonth()===n.getMonth()&&new Date(l.t).getFullYear()===n.getFullYear()).reduce((t,l)=>t+l.valor,0)}
+function foto(){return new Promise(res=>{const f=$('#ft')&&$('#ft').files[0];if(!f)return res('');const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,480/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=im.width*k;cv.height=im.height*k;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);res(cv.toDataURL('image/jpeg',.6))};im.onerror=()=>res('');im.src=r.result};r.onerror=()=>res('');r.readAsDataURL(f)})}
+const chk=()=>`<label>Combustível<select id="comb"><option>Cheio</option><option>3/4</option><option>1/2</option><option>1/4</option><option>Reserva</option></select></label><label>Avarias<input id="av" value="Sem avarias"></label><label>Foto (opcional)<input id="ft" type="file" accept="image/*"></label>`;
+
+const P={grid:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',car:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',fuel:'<path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17"/><path d="M15 10h2a2 2 0 0 1 2 2v3a2 2 0 0 0 4 0V8l-3-3"/><path d="M3 22h12"/><path d="M6 8h6"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',plus:'<path d="M12 5v14M5 12h14"/>',alert:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',file:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 13h6M9 17h6"/>',trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',check:'<path d="M5 12l5 5 10-10"/>',wallet:'<path d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 7l2-3h12M16 14h2"/>',road:'<path d="M6 19 8 5M18 19 16 5M12 6v2M12 11v2M12 16v2"/>',coin:'<circle cx="12" cy="12" r="9"/><path d="M14.5 9a2.5 2.5 0 0 0-2.5-1.5c-1.4 0-2.5.8-2.5 2s1 1.6 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2A2.5 2.5 0 0 1 9.5 15M12 6v1.5M12 16.5V18"/>',gauge:'<path d="M12 14l4-4"/><path d="M3.3 17a9 9 0 1 1 17.4 0"/>',edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',tool:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.8 2.8-2.4-.6-.6-2.4z"/>',lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',compare:'<rect x="3" y="4" width="8" height="16" rx="1"/><rect x="13" y="4" width="8" height="16" rx="1"/>',cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'};
+const ic=n=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+function stats(){
+  const uso=S.cars.filter(c=>c.uso).length;
+  $('#stats').innerHTML=[['Veículos',S.cars.length],['Disponíveis',S.cars.length-uso],['Em uso',uso],['Com alerta',S.cars.filter(c=>alertas(c).length).length]].map(([l,v])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join('');
+}
+let per='mes';
+function rng(p,o){const n=new Date(),y=n.getFullYear(),m=n.getMonth(),s=p==='ano'?12:p==='tri'?3:1,a=p==='ano'?new Date(y+o,0,1):p==='tri'?new Date(y,Math.floor(m/3)*3+o*3,1):new Date(y,m+o,1);return [a.getTime(),new Date(a.getFullYear(),a.getMonth()+s,1).getTime()]}
+const inR=(l,r)=>l.t>=r[0]&&l.t<r[1];
+function dash(){
+  const n=new Date(),da=(l,m)=>{const d=new Date(l.t);return d.getMonth()===m.getMonth()&&d.getFullYear()===m.getFullYear()};
+  const sum=(a,f)=>a.reduce((t,x)=>t+(f(x)||0),0),R=v=>'R$ '+fmt(Math.round(v));
+  const cur=rng(per,0),prv=rng(per,-1),L=S.log.filter(l=>inR(l,cur)),P=S.log.filter(l=>inR(l,prv)),gasto=sum(L,l=>l.valor),km=sum(L,l=>l.rodou),gP=sum(P,l=>l.valor),kP=sum(P,l=>l.rodou),dl=(a,b)=>b?(a>=b?'+':'')+Math.round((a-b)/b*100)+'% vs período anterior':'sem período anterior',pl=per==='ano'?String(new Date(cur[0]).getFullYear()):(per==='tri'?'Trimestre de ':'')+new Date(cur[0]).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const tot=S.cars.map(c=>{const t=sum(S.log.filter(l=>l.placa===c.placa),l=>l.valor)+sum(S.fines.filter(f=>f.placa===c.placa),f=>f.valor),k=S.log.filter(l=>l.placa===c.placa&&l.km).map(l=>l.km),r=k.length>1?Math.max(...k)-Math.min(...k):0;return {p:c.placa,t,c:r?t/r:null}});
+  const rkm={};S.drivers.forEach(d=>rkm[d.nome]={v:0,km:0,g:0,mu:0,mk:0,ml:0});
+  L.forEach(l=>{if(l.tipo==='Devolução'&&l.rodou){const n=l.det.split(' rodou ')[0];if(rkm[n]){rkm[n].v++;rkm[n].km+=l.rodou}}if(l.valor&&l.tipo!=='Saída'&&l.tipo!=='Devolução'){const n=drvAt(l.placa,l.t);if(rkm[n])rkm[n].g+=l.valor}});
+  S.cars.forEach(c=>{const f=S.log.filter(l=>l.placa===c.placa&&l.litros&&l.km).sort((a,b)=>a.km-b.km);f.slice(1).forEach((z,i)=>{if(!inR(z,cur))return;const n=drvAt(c.placa,z.t);if(rkm[n]){rkm[n].mk+=z.km-f[i].km;rkm[n].ml+=z.litros}})});
+  S.fines.forEach(f=>{const t=new Date(f.data).getTime();if(t>=cur[0]&&t<cur[1]){const n=drvAt(f.placa,t);if(rkm[n]){rkm[n].mu++;rkm[n].g+=f.valor}}});
+  const rk=Object.keys(rkm).map(n=>({n,...rkm[n],kl:rkm[n].ml?rkm[n].mk/rkm[n].ml:null})).filter(z=>z.v||z.g||z.mu).sort((a,b)=>(b.kl||0)-(a.kl||0)||a.mu-b.mu);
+  const ks=S.cars.map(cons).filter(Boolean),media=ks.length?ks.reduce((a,b)=>a+b,0)/ks.length:null;
+  const meses=[...Array(6)].map((_,i)=>{const d=new Date(n.getFullYear(),n.getMonth()-5+i,1);return {l:d.toLocaleDateString('pt-BR',{month:'short'}).replace('.',''),v:sum(S.log.filter(x=>da(x,d)),x=>x.valor)}});
+  const mx=Math.max(...meses.map(m=>m.v),1),porCar=S.cars.map(c=>({p:c.placa,v:sum(L.filter(l=>l.placa===c.placa),l=>l.valor),k:cons(c)})),mc=Math.max(...porCar.map(x=>x.v),1),mk=Math.max(...porCar.map(x=>x.k||0),1);
+  const al=[];const pf=S.fines.filter(f=>!f.pago);if(pf.length)al.push(pf.length+(pf.length>1?' multas pendentes: ':' multa pendente: ')+R(sum(pf,f=>f.valor)));S.cars.forEach(c=>alertas(c).forEach(t=>al.push(c.placa+': '+t)));S.drivers.forEach(d=>{const v=venc('CNH',d.cnh);if(v)al.push(d.nome+': '+v)});
+  const uso=S.cars.filter(c=>c.uso);
+  $('#dash').innerHTML=`<div class="seg">${[['mes','Mês'],['tri','Trimestre'],['ano','Ano']].map(([k,t])=>`<button class="seg-b" aria-pressed="${per===k}" data-go="per:${k}">${t}</button>`).join('')}<button class="seg-b" data-go="print:0" style="margin-left:auto">Imprimir / PDF</button></div><h2 class="print-only">Relatório de frota: ${esc(pl)}</h2><div class="kpis"><div class="kpi"><b>${R(gasto)}</b><span>${ic('wallet')}Gasto</span><em>${dl(gasto,gP)}</em></div><div class="kpi"><b>${fmt(km)} km</b><span>${ic('road')}Rodados</span><em>${dl(km,kP)}</em></div><div class="kpi"><b>${km>0&&gasto>0?'R$ '+(gasto/km).toFixed(2).replace('.',','):'—'}</b><span>${ic('coin')}Custo por km</span></div><div class="kpi"><b>${media?media.toFixed(1).replace('.',',')+' km/l':'—'}</b><span>${ic('gauge')}Consumo médio</span></div></div>
+  <div class="dgrid"><div class="panel"><h2>Gasto por mês</h2><div class="bars">${meses.map(m=>`<div class="bc"><span>${m.v?R(m.v):''}</span><div class="bar" style="height:${Math.round(m.v/mx*110)}px"></div><span>${m.l}</span></div>`).join('')}</div></div>
+  <div class="panel"><h2>Gasto por veículo</h2>${porCar.map(x=>`<div class="hr"><span>${esc(x.p)}</span><div class="ht"><div class="hb" style="width:${x.v/mc*100}%"></div></div><b>${R(x.v)}</b></div>`).join('')||'<div class="empty">Sem veículos.</div>'}</div>
+  <div class="panel"><h2>Consumo por veículo</h2>${porCar.map(x=>`<div class="hr"><span>${esc(x.p)}</span><div class="ht"><div class="hb" style="width:${(x.k||0)/mk*100}%"></div></div><b>${x.k?x.k.toFixed(1).replace('.',',')+' km/l':'—'}</b></div>`).join('')}</div>
+  <div class="panel scroll" style="grid-column:1/-1"><h2>Ranking de motoristas</h2>${rk.length?`<table class="rk"><thead><tr><th>Motorista</th><th>Viagens</th><th>Km</th><th>Km/viagem</th><th>Km/l</th><th>Multas</th><th>Gasto</th></tr></thead><tbody>${rk.map((z,i)=>`<tr><td>${i===0&&z.kl?'<span style="color:var(--accent)">'+ic('check')+'</span> ':''}${esc(z.n)}</td><td>${z.v}</td><td>${fmt(z.km)}</td><td>${z.v?fmt(Math.round(z.km/z.v)):'—'}</td><td>${z.kl?z.kl.toFixed(1).replace('.',','):'—'}</td><td>${z.mu}</td><td>${R(z.g)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Sem viagens de motoristas cadastrados neste período.</div>'}<p style="color:var(--muted);font-size:13px;margin:8px 0 0">O check marca o melhor consumo do período. O gasto soma abastecimento, manutenção e multas feitos com o motorista no carro.</p></div>
+  <div class="panel"><h2>Custo total por veículo</h2>${tot.map(x=>`<div class="li"><b>${esc(x.p)}</b> ${R(x.t)}<br><span style="color:var(--muted);font-size:14px">${x.c?'R$ '+x.c.toFixed(2).replace('.',',')+' por km':'precisa de registros com km'}</span></div>`).join('')}<p style="color:var(--muted);font-size:13px;margin:8px 0 0">Soma combustível, manutenção e multas.</p></div>
+  <div class="panel"><h2>Atenção</h2>${al.map(t=>`<div class="li alerta">${esc(t)}</div>`).join('')||'<div class="li livre">Nada vencendo nos próximos 30 dias.</div>'}</div>
+  <div class="panel"><h2>Em uso agora</h2>${uso.map(c=>`<div class="li"><b>${esc(c.placa)}</b> com ${esc(c.uso.mot)} → ${esc(c.uso.dest)}<br><span style="color:var(--muted);font-size:14px">desde ${esc(c.uso.quando)}</span></div>`).join('')||'<div class="li" style="color:var(--muted)">Todos os veículos estão disponíveis.</div>'}</div></div>`;
+}
+function cars(){
+  let h='<div class="grid">'+S.cars.map(c=>{
+    const al=alertas(c),cls=c.uso?'uso':al.length?'rev':'',k=cons(c);
+    const st=c.uso?'<span class="badge emuso">Em uso</span>':'<span class="badge livre">Disponível</span>';
+    let act=`<button class="btn sm" data-go="open:${c.id}">${ic(c.uso?'undo':'key')}${c.uso?'Devolver':'Retirar'}</button> <button class="btn sm sec gonly" data-go="revis:${c.id}">${ic('cal')}Revisão</button> <button class="btn sm ico gonly" data-go="pecas:${c.id}" title="Peças" aria-label="Peças">${ic('tool')}</button> <button class="btn sm ico gonly" data-go="docs:${c.id}" title="Documentos" aria-label="Documentos">${ic('file')}</button> <button class="btn sm ico gonly" data-go="del:${c.id}" title="Remover" aria-label="Remover">${ic('trash')}</button>`;
+    if(open===c.id)act=`<div class="form" style="margin-top:8px">${c.uso?`<label>Km atual<input id="kmf" type="number" inputmode="numeric" value="${esc(c.km)}"></label>`:`<label>Motorista<select id="mot">${S.drivers.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join('')}</select></label><label>Destino<input id="dest"></label>`}${chk()}<button class="btn sm" data-go="${c.uso?'in':'out'}:${c.id}">${c.uso?'Confirmar devolução':'Confirmar saída'}</button><button class="btn sm sec" data-go="cancel:0">Cancelar</button></div>`;
+    if(docOpen===c.id)act=`<div class="form" style="margin-top:8px"><label>IPVA vence em<input id="d1" type="date" value="${esc(c.ipva||'')}"></label><label>Licenciamento vence em<input id="d2" type="date" value="${esc(c.lic||'')}"></label><label>Seguro vence em<input id="d3" type="date" value="${esc(c.seg||'')}"></label><button class="btn sm" data-go="savedocs:${c.id}">Salvar datas</button><button class="btn sm sec" data-go="cancel:0">Cancelar</button></div>`;
+    if(pcOpen===c.id)act=pcForm(c);
+    if(rvOpen===c.id)act=revForm(c);
+    return `<div class="car ${cls}"><div class="row"><span class="plate">${esc(c.placa)}</span>${st}</div>
+    <div class="meta">${esc(c.modelo)} · ${fmt(c.km)} km<br>Próxima revisão: ${fmt(c.prox)} km${c.revdata?' · '+new Date(c.revdata+'T12:00').toLocaleDateString('pt-BR'):''}<br>${k?k.toFixed(1).replace('.',',')+' km/l':'Consumo: precisa de 2 abastecimentos'}<span class="gonly"> · mês: R$ ${fmt(custoMes(c))}</span>${c.uso?`<br>Com ${esc(c.uso.mot)} → ${esc(c.uso.dest)} desde ${esc(c.uso.quando)}`:''}</div>
+    ${al.map(t=>`<div class="badge alerta" style="margin:0 4px 8px 0">${ic('alert')}${esc(t)}</div>`).join('')}${act}</div>`}).join('')+'</div>';
+  const add=`<div class="panel gonly" style="margin-bottom:14px"><b>Adicionar veículo</b><div class="form" style="margin-top:8px"><label>Placa<input id="np"></label><label>Modelo<input id="nm"></label><label>Km atual<input id="nk" type="number" inputmode="numeric"></label><label>Próxima revisão (km)<input id="nr" type="number" inputmode="numeric"></label><button class="btn" data-go="add:0">${ic('plus')}Adicionar</button></div></div>`;
+  $('#car').innerHTML=add+h;
+}
+function revForm(c){const r=c.prox-c.km;return `<div class="form" style="margin-top:8px"><label>Próxima revisão (km)<input id="rk" type="number" inputmode="numeric" value="${esc(c.prox||'')}"></label><label>Data da próxima revisão<input id="rd" type="date" value="${esc(c.revdata||'')}"></label><button class="btn sm" data-go="svrev:${c.id}">Salvar</button><button class="btn sm sec" data-go="revok:${c.id}">Revisão feita agora</button><button class="btn sm sec" data-go="cancel:0">Fechar</button></div><p style="color:var(--muted);font-size:13px;margin:6px 0 0">${r<=0?'Vencida há '+fmt(-r)+' km':'Faltam '+fmt(r)+' km'}. "Feita agora" programa a próxima para daqui a 10.000 km.</p>`}
+function drv(){
+  const rows=S.drivers.map(d=>{const v=venc('CNH',d.cnh);return `<tr><td>${esc(d.nome)}</td><td>${d.cnh?new Date(d.cnh+'T12:00').toLocaleDateString('pt-BR'):'—'}</td><td class="${v?'alerta':''}">${esc(v)||'Em dia'}</td><td><button class="btn sm sec" data-go="deld:${d.id}">Remover</button></td></tr>`}).join('');
+  $('#drv').innerHTML=`<div class="panel"><div class="form"><label>Nome<input id="dn"></label><label>Validade da CNH<input id="dc" type="date"></label><button class="btn" data-go="addd:0">${ic('plus')}Cadastrar motorista</button></div></div>`+(rows?`<div class="panel scroll"><table><thead><tr><th>Motorista</th><th>CNH até</th><th>Situação</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">Cadastre o primeiro motorista para liberar a retirada de veículos.</div>');
+}
+function logForm(){
+  $('#log').innerHTML=`<div class="panel"><div class="form"><label>Veículo<select id="lc">${S.cars.map(c=>`<option value="${c.id}">${esc(c.placa)} · ${esc(c.modelo)}</option>`).join('')}</select></label>
+  <label>Tipo<select id="lt"><option>Abastecimento</option><option>Troca de óleo</option><option>Revisão</option><option>Pneus</option><option>Outro</option></select></label>
+  <label>Km<input id="lk" type="number" inputmode="numeric"></label><label>Litros<input id="ll" type="number" step="0.01" inputmode="decimal"></label><label>Valor (R$)<input id="lv" type="number" step="0.01" inputmode="decimal"></label><label>Observação<input id="lo"></label>
+  <button class="btn" data-go="reg:0">${ic('check')}Registrar</button></div></div>`;
+}
+function hist(){
+  const rows=S.log.map((l,i)=>[l,i]).reverse().map(([l,i])=>ed===i?`<tr><td colspan="6"><div class="form"><label>Detalhe<input id="e1" value="${esc(l.det)}"></label><label>Valor<input id="e2" type="number" step="0.01" value="${esc(l.valor||'')}"></label><label>Km<input id="e3" type="number" value="${esc(l.km||'')}"></label><label>Litros<input id="e4" type="number" step="0.01" value="${esc(l.litros||'')}"></label><button class="btn sm" data-go="svlog:${i}">Salvar</button><button class="btn sm sec" data-go="cancel:0">Cancelar</button></div></td></tr>`:`<tr><td>${esc(l.quando)}</td><td>${esc(l.placa)}</td><td>${esc(l.tipo)}</td><td>${esc(l.det)} ${l.foto?`<img class="thumb" src="${esc(l.foto)}" alt="Foto do veículo">`:''}</td><td>${l.valor?'R$ '+fmt(l.valor):''}</td><td>${l.tipo==='Devolução'?`<button class="btn sm ico" data-go="cmp:${i}" title="Comparar fotos" aria-label="Comparar fotos">${ic('compare')}</button>`:''}<button class="btn sm ico" data-go="editlog:${i}" title="Editar registro" aria-label="Editar registro">${ic('edit')}</button><button class="btn sm ico" data-go="dellog:${i}" title="Excluir registro" aria-label="Excluir registro">${pending('dellog'+i)?'<span style="color:var(--warn)">Confirmar?</span>':ic('trash')}</button></td></tr>`).join('');
+  $('#hist').innerHTML=cmpView()+(rows?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn sm ico" data-go="clearlog:0">${pending('clearlog0')?'Confirmar?':ic('trash')+'Limpar histórico'}</button></div><div class="panel scroll"><table><thead><tr><th>Data</th><th>Veículo</th><th>Evento</th><th>Detalhe</th><th>Valor</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">Nenhum registro ainda. Retire um carro ou registre um abastecimento.</div>');
+}
+function fin(){
+  const quem=f=>{const t=new Date(f.data).getTime();let c=null;S.log.filter(l=>l.placa===f.placa&&(l.tipo==='Saída'||l.tipo==='Devolução')).sort((a,b)=>a.t-b.t).forEach(l=>{if(l.t<=t)c=l.tipo==='Saída'?l.det.split(' → ')[0]:null});return c||'Sem saída registrada nesse horário'};
+  const rows=S.fines.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(f=>`<tr><td>${new Date(f.data).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(f.placa)}</td><td>${esc(quem(f))}</td><td>${esc(f.desc)}</td><td>R$ ${fmt(f.valor)}</td><td><button class="btn sm ${f.pago?'sec':''}" data-go="payf:${f.id}">${f.pago?'Paga':'Pendente'}</button></td><td><button class="btn sm ico" data-go="delf:${f.id}" aria-label="Excluir multa">${pending('delf'+f.id)?'Confirmar?':ic('trash')}</button></td></tr>`).join('');
+  $('#fin').innerHTML=`<div class="panel"><div class="form"><label>Veículo<select id="fc">${S.cars.map(c=>`<option value="${c.id}">${esc(c.placa)} · ${esc(c.modelo)}</option>`).join('')}</select></label><label>Data e hora da infração<input id="fd" type="datetime-local"></label><label>Valor (R$)<input id="fv" type="number" step="0.01" inputmode="decimal"></label><label>Descrição<input id="fo"></label><button class="btn" data-go="addf:0">${ic('plus')}Registrar multa</button></div></div>`+(rows?`<div class="panel scroll"><table><thead><tr><th>Infração</th><th>Veículo</th><th>Motorista</th><th>Descrição</th><th>Valor</th><th>Situação</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">Nenhuma multa registrada.</div>');
+}
+function render(){rolebar();dash();cars();drv();logForm();hist();fin();$('#note').textContent=note;note=''}
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('.tab');
+  if(t){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b===t));['dash','car','drv','log','fin','hist'].forEach(i=>$('#'+i).hidden=i!==t.dataset.t);return}
+  const g=e.target.closest('[data-go]');if(!g)return;
+  if(!cloud.csrf || cloud.busy || cloud.blocked)return;
+  cloud.busy=true; $('#workspace').inert=true;
+  try {
+  const [a,id,x]=g.dataset.go.split(':');const c=S.cars.find(x=>x.id==id);
+  if(a==='open'){open=c.id;docOpen=null;pcOpen=null;rvOpen=null}
+  if(a==='docs'){docOpen=c.id;open=null;pcOpen=null;rvOpen=null}
+  if(a==='cancel'){open=null;docOpen=null;ed=null;cmp=null;pcOpen=null;rvOpen=null}
+  if(a==='savedocs'){c.ipva=$('#d1').value;c.lic=$('#d2').value;c.seg=$('#d3').value;docOpen=null}
+  if(a==='out'){const dr=S.drivers.find(x=>x.id==$('#mot').value),d=$('#dest').value.trim();
+    if(!dr)note='Cadastre um motorista na aba Motoristas antes de retirar um veículo.';
+    else if(dr.cnh&&dias(dr.cnh)<0)note='CNH de '+dr.nome+' está vencida. Saída bloqueada.';
+    else if(!d)note='Informe o destino.';
+    else{const f=await foto(),ck=$('#comb').value+', '+$('#av').value;
+      c.uso={mot:dr.nome,dest:d,quando:hoje(),kmIni:c.km};S.log.push({quando:hoje(),t:Date.now(),placa:c.placa,tipo:'Saída',det:dr.nome+' → '+d+' · combustível '+ck,foto:f});open=null}}
+  if(a==='in'){const k=Number($('#kmf').value);
+    if(k<c.km)note='O km final não pode ser menor que '+fmt(c.km)+'.';
+    else{const f=await foto(),r=k-c.uso.kmIni;
+      S.log.push({quando:hoje(),t:Date.now(),placa:c.placa,tipo:'Devolução',rodou:r,det:c.uso.mot+' rodou '+fmt(r)+' km · combustível '+$('#comb').value+', '+$('#av').value,foto:f});c.km=k;c.uso=null;open=null}}
+  if(a==='del'&&ask(a+id,'Clique de novo na lixeira para remover '+c.placa+'.'))S.cars=S.cars.filter(x=>x!==c);
+  if(a==='add'){const p=$('#np').value.trim().toUpperCase(),m=$('#nm').value.trim(),k=Number($('#nk').value),r=Number($('#nr').value);
+    if(p&&m)S.cars.push({id:Date.now(),placa:p,modelo:m,km:k||0,prox:r||(k||0)+10000,uso:null})}
+  if(a==='addd'){const n=$('#dn').value.trim();if(n)S.drivers.push({id:Date.now(),nome:n,cnh:$('#dc').value})}
+  if(a==='deld')S.drivers=S.drivers.filter(x=>x.id!=id);
+  if(a==='dellog'&&ask(a+id,''))S.log.splice(Number(id),1);
+  if(a==='clearlog'&&ask(a+id,''))S.log=[];
+  if(a==='per')per=id;
+  if(a==='print'){window.print();return}
+  if(a==='editlog')ed=Number(id);
+  if(a==='svlog'){const l=S.log[Number(id)];if(l){l.det=$('#e1').value;l.valor=Number($('#e2').value)||0;l.litros=Number($('#e4').value)||0;if(l.km||$('#e3').value)l.km=Number($('#e3').value)||0}ed=null}
+  if(a==='addf'){const v=S.cars.find(x=>x.id==$('#fc').value),d=$('#fd').value;if(v&&d)S.fines.push({id:Date.now(),placa:v.placa,data:d,valor:Number($('#fv').value)||0,desc:$('#fo').value.trim(),pago:false});else note='Informe o veículo e a data da infração.'}
+  if(a==='payf'){const f=S.fines.find(x=>x.id==id);if(f)f.pago=!f.pago}
+  if(a==='delf'&&ask(a+id,''))S.fines=S.fines.filter(z=>z.id!=id);
+  if(a==='cmp')cmp=Number(id);
+  if(a==='pecas'){pcOpen=c.id;open=null;docOpen=null;rvOpen=null}
+  if(a==='svpec'){c.pecas=[0,1,2].map(i=>{const t=$('#pt'+i).value;return {troca:t===''?null:Number(t),vida:Number($('#pv'+i).value)||PV[i]}});pcOpen=null;note='Peças salvas.'}
+  if(a==='troca'){const i=Number(x);c.pecas=c.pecas||[null,null,null];c.pecas[i]={troca:c.km,vida:Number($('#pv'+i).value)||PV[i]};S.log.push({quando:hoje(),t:Date.now(),placa:c.placa,tipo:'Troca de peça',det:PN[i]+' trocado aos '+fmt(c.km)+' km',valor:0})}
+  if(a==='modo')S.role='mot';
+  if(a==='gest')S.role='ges';
+  if(a==='revis'){rvOpen=c.id;open=null;docOpen=null;pcOpen=null}
+  if(a==='svrev'){const k=Number($('#rk').value);if(k>0){c.prox=k;c.revdata=$('#rd').value;rvOpen=null;note='Revisão atualizada.'}else note='Informe o km da próxima revisão.'}
+  if(a==='revok'){rvOpen=null;c.prox=c.km+10000;c.revdata='';S.log.push({quando:hoje(),t:Date.now(),placa:c.placa,tipo:'Revisão',km:c.km,det:'Revisão feita aos '+fmt(c.km)+' km',valor:0});note='Revisão registrada. Próxima aos '+fmt(c.prox)+' km.'}
+  if(a==='reg'){const v=S.cars.find(x=>x.id==$('#lc').value);if(v){const k=Number($('#lk').value),tp=$('#lt').value;
+    if(k>v.km)v.km=k;if(tp==='Troca de óleo'||tp==='Revisão')v.prox=v.km+10000;
+    S.log.push({quando:hoje(),t:Date.now(),placa:v.placa,tipo:tp,km:k||0,litros:Number($('#ll').value)||0,det:(k?fmt(k)+' km. ':'')+$('#lo').value,valor:Number($('#lv').value)||0});note='Registro salvo.'}}
+  await save();render();
+  if(a==='gest'&&S.role==='ges')$('.tab[data-t="dash"]').click();
+  } finally {cloud.busy=false; $('#workspace').inert=cloud.blocked;}
+});
+const TI=['grid','car','users','fuel','flag','clock'];
+document.querySelectorAll('.tab').forEach((b,i)=>b.innerHTML=ic(TI[i])+'<span>'+b.textContent+'</span>');
+$('h1').innerHTML='<img src="data:image/png;base64,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" alt="" width="30" height="30" style="flex:none"><span>Fleet<b>On</b></span>';
+</script>
+<script src="/config.js"></script>
+<script src="/vendor/supabase.js"></script>
+<script src="/supabase-adapter.js"></script>
+<script src="/cloud.js"></script>
+</body>
+</html>

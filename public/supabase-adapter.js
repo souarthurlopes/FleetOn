@@ -1,0 +1,61 @@
+// Integração via SDK oficial; a chave pública não concede acesso sem login/RLS.
+window.FleetOnRemote = (() => {
+  const config=window.FLEETON_CONFIG || {};
+  const enabled=config.backend === 'supabase';
+  let client, recovering=false;
+  function connect() {
+    if(client) return client;
+    if(!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(config.supabaseUrl || '') || !config.supabasePublishableKey) throw new Error('Configure a URL e a chave pública do Supabase antes de entrar.');
+    const key=config.supabasePublishableKey;
+    if(!key.startsWith('sb_publishable_')) {
+      let claims;
+      try {claims=JSON.parse(atob(key.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));} catch {}
+      if(claims?.role !== 'anon') throw new Error('Use somente a chave pública publishable ou anon.');
+    }
+    client=FleetOnSupabase.createClient(config.supabaseUrl,key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
+    client.auth.onAuthStateChange(event=>{
+      if(event==='PASSWORD_RECOVERY') {
+        recovering=true;
+        setTimeout(()=>window.dispatchEvent(new Event('fleeton-recovery')),0);
+      }
+    });
+    return client;
+  }
+  function fail(error) {
+    if(!error) return;
+    const message=String(error.message || '');
+    if(message.includes('FLEET_CONFLICT')) throw new Error('A frota mudou em outro dispositivo. Exporte suas alterações e atualize antes de editar.');
+    if(message.includes('FLEET_INVALID')) throw new Error('Arquivo ou dados da frota inválidos. Verifique o backup.');
+    if(message.includes('FLEET_TOO_LARGE')) throw new Error('Dados maiores que 8 MB. Exporte um backup e reduza as fotos.');
+    if(message.includes('Invalid login credentials')) throw new Error('E-mail ou senha incorretos.');
+    if(message.includes('Email not confirmed')) throw new Error('Confirme seu e-mail antes de entrar.');
+    if(error.status===429) throw new Error('Muitas tentativas. Aguarde antes de tentar novamente.');
+    if(message.includes('fetch')) throw new Error('Não foi possível conectar ao Supabase. Verifique sua conexão.');
+    if(message.includes('function') || message.includes('schema cache')) throw new Error('O banco precisa ser configurado com a migração SQL do FleetOn.');
+    throw new Error('Não foi possível concluir a operação. Confira a configuração e tente novamente.');
+  }
+  const sessionInfo=s=>({email:s.user.email,csrf:'supabase-session'});
+  async function request(path,body) {
+    const db=connect();
+    if(path==='register') {
+      const {data,error}=await db.auth.signUp({...body,options:{emailRedirectTo:location.origin+'/'}});fail(error);
+      return data.session ? sessionInfo(data.session) : {confirmationRequired:true};
+    }
+    if(path==='login') {const {data,error}=await db.auth.signInWithPassword(body);fail(error);return sessionInfo(data.session);}
+    if(path==='reset') {
+      const {error}=await db.auth.resetPasswordForEmail(body.email,{redirectTo:location.origin+'/'});fail(error);return {};
+    }
+    if(path==='password') {const {error}=await db.auth.updateUser({password:body.password});fail(error);recovering=false;return {};}
+    if(path==='logout') {const {error}=await db.auth.signOut({scope:'local'});fail(error);return {};}
+    const {data:auth,error:authError}=await db.auth.getSession();fail(authError);
+    if(!auth.session) throw new Error('Entre na sua conta.');
+    if(path==='session') return sessionInfo(auth.session);
+    if(path==='fleet') {
+      if(body && new Blob([JSON.stringify(body.state)]).size>8*1024*1024) throw new Error('Dados maiores que 8 MB. Exporte um backup.');
+      const {data,error}=await db.rpc(body ? 'fleeton_save_fleet' : 'fleeton_get_fleet',body ? {p_version:body.version,p_state:body.state} : {});
+      fail(error);return data;
+    }
+    throw new Error('Operação desconhecida.');
+  }
+  return {enabled,configured:!!(config.supabaseUrl && config.supabasePublishableKey),request,get recovering(){return recovering;}};
+})();

@@ -1,0 +1,11 @@
+{
+  "name": "fleeton", "version": "0.1.0", "private": true,
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "python3 -m http.server 8000 --bind 127.0.0.1 --directory dist",
+    "test": "node --test tests/supabase.test.mjs"
+  },
+  "engines": {"node": ">=22"},
+  "dependencies": {"@supabase/supabase-js": "2.118.0"},
+  "devDependencies": {"@electric-sql/pglite": "0.3.14", "esbuild": "0.28.2"}
+}

@@ -1,0 +1,136 @@
+let cloud = {csrf: '', version: 0, busy: false, blocked: false, dirty: false};
+const account = document.querySelector('#account');
+const syncStatus = document.querySelector('#sync-status');
+const stateOnly = () => ({cars:S.cars, drivers:S.drivers, log:S.log, fines:S.fines});
+async function api(path, body) {
+  if(window.FleetOnRemote?.enabled) return FleetOnRemote.request(path,body);
+  const response = await fetch('/api/' + path, {
+    method: body === undefined ? 'GET' : 'POST', credentials: 'same-origin',
+    headers: {'Content-Type':'application/json', 'X-CSRF-Token':cloud.csrf},
+    ...(body === undefined ? {} : {body:JSON.stringify(body)})
+  });
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'Não foi possível conectar.');
+  return result;
+}
+function exportBackup() {
+  const url = URL.createObjectURL(new Blob([JSON.stringify(stateOnly(), null, 2)], {type:'application/json'}));
+  const a = document.createElement('a'); a.href=url; a.download='fleeton-backup.json'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function resetView(state) {
+  S = {...state, role:'ges'};
+  open=null; docOpen=null; ed=null; cmp=null; pcOpen=null; rvOpen=null;
+  render();
+}
+async function saveCloud() {
+  if(JSON.stringify(stateOnly())===cloud.lastState) return;
+  cloud.dirty = true;
+  try {
+    const data = await api('fleet', {version:cloud.version, state:stateOnly()});
+    cloud.version = data.version; cloud.dirty = false; cloud.lastState=JSON.stringify(stateOnly());
+    syncStatus.textContent='Salvo no servidor.';
+  } catch(error) {
+    cloud.blocked=true;
+    document.querySelector('#workspace').inert=true;
+    syncStatus.textContent=error.message + ' Suas alterações continuam nesta tela. Exporte um backup antes de recarregar.';
+  }
+}
+function authScreen() {
+  document.querySelector('#workspace').hidden=true;
+  account.innerHTML=`<div class="panel" style="max-width:440px;margin:40px auto"><h2>Acesse sua frota</h2>
+  <p>Entre com a mesma conta em outros dispositivos para acessar seus dados.</p>
+  <form id="auth-form"><label>E-mail<input id="email" type="email" autocomplete="username" maxlength="254" required></label>
+  <label>Senha<input id="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" required></label>
+  <p>Use uma senha com pelo menos 10 caracteres.</p><div class="form"><button class="btn" type="submit">Entrar</button><button class="btn sec" type="submit" name="register" value="1">Criar conta</button></div>
+  <button class="btn sec" id="reset-password" type="button" hidden>Esqueci minha senha</button><p id="auth-error" role="alert"></p></form></div>`;
+  if(window.FleetOnRemote?.enabled) {
+    document.querySelector('#reset-password').hidden=false;
+    document.querySelector('#reset-password').onclick=async()=>{
+      const email=document.querySelector('#email');
+      if(!email.value || !email.reportValidity()) return;
+      try{await api('reset',{email:email.value});document.querySelector('#auth-error').textContent='Se o endereço estiver cadastrado, você receberá um link para redefinir a senha. Abra-o neste mesmo navegador.';}
+      catch(error){document.querySelector('#auth-error').textContent=error.message;}
+    };
+  }
+  document.querySelector('#auth-form').onsubmit=async event=>{
+    event.preventDefault();
+    const form=event.currentTarget;
+    const creating=event.submitter?.name==='register';
+    const body={email:document.querySelector('#email').value, password:document.querySelector('#password').value};
+    form.querySelectorAll('button').forEach(b=>b.disabled=true);
+    try {
+      const session=await api(creating?'register':'login',body);
+      if(session.confirmationRequired) {
+        document.querySelector('#auth-error').textContent='Confira seu e-mail para confirmar o cadastro. Depois volte para entrar. Abra o link neste mesmo navegador.';
+        document.querySelector('#password').value='';
+      } else await enter(session);
+    }
+    catch(error) { document.querySelector('#auth-error').textContent=error.message; }
+    finally { form.querySelectorAll('button').forEach(b=>b.disabled=false); }
+  };
+}
+async function enter(session) {
+  if(window.FleetOnRemote?.recovering) {recoveryScreen();return;}
+  cloud.csrf=session.csrf;
+  const data=await api('fleet');
+  cloud.version=data.version; cloud.blocked=false; cloud.dirty=false;
+  resetView(data.state); cloud.lastState=JSON.stringify(stateOnly());
+  account.innerHTML=`<div class="panel"><div class="row"><span id="user-email"></span><button class="btn sec" id="logout">Sair</button></div>
+  <p>Dados salvos nesta conta. O modo motorista é apenas uma visualização; o PIN antigo não controla o acesso à conta.</p>
+  <div class="form"><button class="btn sec" id="refresh">Atualizar dados</button><button class="btn sec" id="backup">Exportar backup</button>
+  <label>Importar dados do HTML antigo (JSON)<input id="import" type="file" accept="application/json,.json"></label></div>
+  <p>Importação disponível somente com a frota vazia. No HTML antigo, os dados ficam no navegador onde foram cadastrados; abrir este site não os transfere automaticamente.</p></div>`;
+  document.querySelector('#user-email').textContent=session.email;
+  document.querySelector('#workspace').hidden=false;
+  document.querySelector('#workspace').inert=false;
+  syncStatus.textContent='Dados carregados do servidor.';
+  document.querySelector('#backup').onclick=exportBackup;
+  document.querySelector('#logout').onclick=async()=>{
+    if(cloud.busy) return;
+    if(cloud.dirty && !confirm('Há alterações não salvas. Exporte um backup antes de sair. Deseja sair mesmo assim?')) return;
+    try {await api('logout',{}); resetView({cars:[],drivers:[],log:[],fines:[]}); cloud.csrf=''; cloud.dirty=false; syncStatus.textContent=''; authScreen();}
+    catch(error){syncStatus.textContent=error.message;}
+  };
+  document.querySelector('#refresh').onclick=async()=>{
+    if(cloud.busy) return;
+    if(cloud.dirty && !confirm('Atualizar descarta as alterações não salvas. Já exportou o backup e deseja continuar?')) return;
+    try{await enter(await api('session'));}catch(error){syncStatus.textContent=error.message;}
+  };
+  document.querySelector('#import').onchange=async event=>{
+    const file=event.target.files[0]; if(!file || cloud.busy || cloud.blocked) return;
+    if(Object.values(stateOnly()).some(items=>items.length)) {syncStatus.textContent='A importação exige uma frota vazia para evitar substituir registros.'; return;}
+    if(file.size>8*1024*1024) {syncStatus.textContent='Arquivo maior que 8 MB.'; return;}
+    cloud.busy=true;
+    try {
+      const raw=JSON.parse(await file.text());
+      const state={cars:raw.cars||[],drivers:raw.drivers||[],log:raw.log||[],fines:raw.fines||[]};
+      const data=await api('fleet',{version:cloud.version,state});
+      cloud.version=data.version; resetView(state); cloud.lastState=JSON.stringify(stateOnly()); syncStatus.textContent='Dados importados e salvos no servidor.';
+    }catch(error){syncStatus.textContent=error.message;}
+    finally{cloud.busy=false; event.target.value='';}
+  };
+}
+window.addEventListener('beforeunload',event=>{if(cloud.dirty){event.preventDefault();event.returnValue='';}});
+function recoveryScreen() {
+  document.querySelector('#workspace').hidden=true;
+  account.innerHTML=`<div class="panel"><h2>Crie uma nova senha</h2><form id="recovery-form"><label>Nova senha<input id="new-password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label><button class="btn" type="submit">Salvar senha</button><p id="recovery-error" role="alert"></p></form></div>`;
+  document.querySelector('#recovery-form').onsubmit=async event=>{
+    event.preventDefault();const button=event.currentTarget.querySelector('button');button.disabled=true;
+    try{await api('password',{password:document.querySelector('#new-password').value});await enter(await api('session'));}
+    catch(error){document.querySelector('#recovery-error').textContent=error.message;}
+    finally{button.disabled=false;}
+  };
+}
+window.addEventListener('fleeton-recovery',recoveryScreen);
+(async()=>{
+  if(window.FleetOnRemote?.enabled && !FleetOnRemote.configured) {
+    document.querySelector('#workspace').hidden=true;
+    account.innerHTML='<div class="panel"><h2>FleetOn</h2><p>A conexão com o banco ainda não foi configurada. O responsável pelo site precisa concluir a configuração do Supabase.</p></div>';
+    return;
+  }
+  try {await enter(await api('session'));} catch(error) {
+    authScreen();
+    if(error.message !== 'Entre na sua conta.') document.querySelector('#auth-error').textContent=error.message;
+  }
+})();
