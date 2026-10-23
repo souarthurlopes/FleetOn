@@ -34,6 +34,7 @@ try:
         session={'access_token':token,'refresh_token':'refresh-test','expires_in':3600,'token_type':'bearer','user':user}
         fleet={'version':0,'state':{'cars':[],'drivers':[],'log':[],'fines':[]}}
         profile_context={'role':'manager','user_id':user['id'],'owner_id':user['id'],'profile':{'name':'','avatar':''},'invitation':None}
+        invite_failure={'enabled':False}
         team={'members':[],'invites':[]}
         calls=[]
         def remote(route):
@@ -47,6 +48,9 @@ try:
             if path.startswith('/auth/v1/recover') or path.startswith('/auth/v1/logout'):return reply({})
             if path.startswith('/rest/v1/rpc/fleeton_sync_status'):return reply({'role':profile_context['role'],'owner_id':profile_context['owner_id'],'version':fleet['version']})
             if path.startswith('/rest/v1/rpc/fleeton_context'):return reply(profile_context)
+            if path.startswith('/rest/v1/rpc/fleeton_accept_invite'):
+                if invite_failure['enabled']:return reply({'code':'P0001','message':'TEAM_OTHER_FLEET'},400)
+                profile_context.update(role='driver',owner_id='22222222-2222-2222-2222-222222222222',invitation=None);return reply(profile_context)
             if path.startswith('/rest/v1/rpc/fleeton_save_profile'):
                 args=req.post_data_json;profile_context['profile']={'name':args['p_name'],'avatar':args['p_avatar']};return reply(profile_context['profile'])
             if path.startswith('/rest/v1/rpc/fleeton_team'):
@@ -163,11 +167,24 @@ try:
         assert page.evaluate('fleetSyncSetupRequired')
         context.unroute('**/rest/v1/rpc/fleeton_sync_status')
         page.locator('#refresh').click();page.locator('#user-email').wait_for()
-        profile_context['role']='driver'
+        profile_context['role']='manager'
+        profile_context['invitation']={'email':'manager@example.com'}
+        invite_failure['enabled']=True
+        page.reload();expect(page.locator('#auth-error')).to_contain_text('outra frota');expect(page.locator('#workspace')).not_to_be_visible()
+        failed_context=max(i for i,x in enumerate(calls) if '/fleeton_context' in x)
+        assert not any('/fleeton_get_fleet' in x for x in calls[failed_context:])
+        invite_failure['enabled']=False
+        invitation_start=len(calls)
         profile_context['owner_id']='22222222-2222-2222-2222-222222222222'
         fleet['state']['drivers']=[{'id':0,'nome':'Ana Lopes'}];fleet['state']['log']=[];fleet['state']['fines']=[]
         page.reload();page.locator('#user-email').wait_for()
         assert page.locator('#profile-role').inner_text()=='Motorista'
+        accept_index=next(i for i,x in enumerate(calls[invitation_start:]) if '/fleeton_accept_invite' in x)
+        fleet_index=next(i for i,x in enumerate(calls[invitation_start:]) if '/fleeton_get_fleet' in x)
+        assert accept_index< fleet_index
+        expect(page.get_by_role('button',name='Aceitar convite',exact=True)).to_have_count(0)
+        page.reload();page.locator('#user-email').wait_for()
+        assert sum('/fleeton_accept_invite' in x for x in calls[invitation_start:])==1
         assert not page.locator('.tabs').is_visible()
         expect(page.locator('#alerts-shortcut')).to_have_count(0)
         expect(page.locator('.alert-item')).to_have_count(0)

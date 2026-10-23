@@ -25,7 +25,7 @@ function paintAccount(session,context) {
   account.innerHTML=`<header class="account-header"><div class="account-identity"><span class="profile-avatar" id="profile-avatar" aria-hidden="true"></span><div class="identity-text"><strong id="profile-name"></strong><span id="user-email"></span><span class="profile-role" id="profile-role"></span></div></div><div class="account-actions"><button class="btn sec" id="refresh">Atualizar dados</button><button class="btn sec" id="logout">Sair</button></div></header>
   <details id="account-settings" class="account-settings"><summary>Minha conta</summary><div class="settings-grid"><section class="panel"><h2>Meu perfil</h2><form id="profile-form"><label>Nome<input id="edit-name" maxlength="80" autocomplete="name" required></label><label>Foto de perfil<input id="edit-avatar" type="file" accept="image/*"></label><p class="settings-help">Foto de até 5 MB. Seu perfil acompanha a conta em outros dispositivos.</p><div class="account-actions"><button class="btn" type="submit">Salvar perfil</button><button class="btn sec" type="button" id="remove-avatar">Remover foto</button></div><p id="profile-status" role="status"></p></form></section>
   ${manager?'<section class="panel"><h2>Dados da frota</h2><button class="btn sec" id="backup">Exportar backup</button><label>Importar backup (JSON)<input id="import" type="file" accept="application/json,.json"></label><p class="settings-help">Para importar, a frota precisa estar vazia.</p></section>':''}
-  ${manager && window.FleetOnRemote?.enabled?'<section class="panel"><h2>Equipe</h2><form id="invite-form"><label>E-mail do motorista<input id="invite-email" type="email" required maxlength="254"></label><button class="btn" type="submit">Convidar motorista</button></form><p class="settings-help">O motorista cria a conta, confirma o e-mail e aceita o convite ao entrar. Nenhum e-mail é enviado por este botão.</p><p id="team-status" role="status"></p><div id="team-list"></div></section>':''}
+  ${manager && window.FleetOnRemote?.enabled?'<section class="panel"><h2>Equipe</h2><form id="invite-form"><label>E-mail do motorista<input id="invite-email" type="email" required maxlength="254"></label><button class="btn" type="submit">Convidar motorista</button></form><p class="settings-help">O convidado cria a conta com este e-mail, confirma o endereço e entra automaticamente como motorista da sua frota. Nenhum e-mail é enviado por este botão.</p><p id="team-status" role="status"></p><div id="team-list"></div></section>':''}
   </div></details><div id="invite-notice"></div>`;
   layoutAccount();
   profileDisplay(session,context);
@@ -82,7 +82,7 @@ function paintAccount(session,context) {
     };
     document.querySelector('#invite-form').onsubmit=async event=>{
       event.preventDefault();const form=event.currentTarget,button=form.querySelector('button');button.disabled=true;
-      try{paintTeam(await api('team',{action:'invite',email:document.querySelector('#invite-email').value.trim()}));form.reset();status.textContent='Convite disponível. Peça ao motorista para entrar e aceitar com esse e-mail.';}
+      try{paintTeam(await api('team',{action:'invite',email:document.querySelector('#invite-email').value.trim()}));form.reset();status.textContent='Convite disponível. Ao entrar com esse e-mail confirmado, o convidado acessará sua frota como motorista.';}
       catch(error){status.textContent=error.message;}
       finally{button.disabled=false;}
     };

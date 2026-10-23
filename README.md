@@ -110,8 +110,8 @@ projeto Supabase real.
 
 Cada conta nova começa como **gestor da própria frota**, sem acesso às demais.
 O gestor abre **Meu perfil → Equipe** e convida motoristas pelo e-mail.
-O motorista cria uma conta com esse mesmo e-mail, confirma o cadastro e aceita
-explicitamente o convite exibido ao entrar. O convite fica no aplicativo; não
+O motorista cria uma conta com esse mesmo e-mail, confirma o cadastro e entra
+automaticamente como motorista ao acessar o aplicativo. O convite fica no aplicativo; não
 envia e-mail automaticamente. Nesta versão, uma conta participa de uma frota.
 Uma conta com frota própria preenchida/equipe não pode aceitar outra frota: use
 uma conta nova ou vazia. Convites pendentes da própria equipe devem ser cancelados
@@ -355,3 +355,13 @@ custos permanecem restritos ao gestor, pelas permissões existentes.
 Não há nova migração SQL para estas telas. Validação: `npm test` e
 `python3 tests/browser_reports.py` (conta e banco locais descartáveis; filtros,
 custos, fotos, CSV/PDF completos, navegação, persistência e celular).
+
+## Entrada automática dos convidados
+
+Ao entrar com um e-mail confirmado que tem convite pendente, o aplicativo conclui
+o vínculo como motorista antes de carregar a frota. O cargo fica salvo no banco
+e vale nos próximos acessos. Não é preciso clicar em Aceitar convite nem aplicar
+outra migração SQL. O botão Convidar motorista registra o convite no aplicativo;
+ele não envia e-mail. O convidado deve cadastrar-se com o endereço convidado e
+confirmá-lo. Contas com outra frota/dados continuam protegidas pelas validações
+existentes; se o vínculo falhar, o login informa o erro sem abrir a área do gestor.

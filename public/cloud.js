@@ -79,6 +79,10 @@ async function enter(session) {
   stopFleetSync();
   cloud.csrf=session.csrf;
   cloud.context=await api('context');
+  // Resolve the server-validated invitation before fetching or showing a fleet.
+  if(window.FleetOnRemote?.enabled && cloud.context.invitation && cloud.context.role!=='driver') {
+    cloud.context=await api('acceptInvite',{});
+  }
   const data=await api('fleet');
   cloud.version=data.version; cloud.blocked=false; cloud.dirty=false;
   resetView(data.state); cloud.lastState=JSON.stringify(stateOnly());
