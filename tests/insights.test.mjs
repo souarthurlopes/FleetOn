@@ -40,3 +40,13 @@ test('Central mantém pendências independentes e busca combina filtros sem depe
  assert.equal(cars.filter(c=>matches(c,{status:'attention'},now)).length,2);
  assert.equal(cars.filter(c=>matches(c,{query:'não existe'},now)).length,0);
 });
+test('Multas distinguem vencida, hoje, futura, paga e vencimento não informado em Brasília',()=>{
+ const due=globalThis.FleetInsights.fineDue,midnight=new Date('2026-10-23T02:59:59Z');
+ assert.equal(due({vencimento:'2026-10-22'},midnight).label,'Vence hoje');
+ assert.equal(due({vencimento:'2026-10-21'},midnight).urgent,true);
+ assert.equal(due({vencimento:'2026-10-23'},midnight).label,'A vencer');
+ assert.equal(due({vencimento:'2026-10-21',pago:true},midnight).urgent,false);
+ assert.equal(due({vencimento:'2026-10-21',pago:true},midnight).label,'Paga');
+ assert.equal(due({},midnight).label,'Não informado');
+ assert.equal(due({vencimento:'2026-02-30'},midnight).date,'');
+});

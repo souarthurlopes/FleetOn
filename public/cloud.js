@@ -20,6 +20,7 @@ function exportBackup() {
 }
 function resetView(state) {
   S = {...state, role:cloud.context?.role==='driver'?'mot':'ges'};
+  fineDueEdit=null;
   open=null; docOpen=null; ed=null; cmp=null; pcOpen=null; rvOpen=null;
   render();
 }

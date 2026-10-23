@@ -5,7 +5,7 @@ const FLEET_SYNC_INTERVAL=20000;
 function hasWorkspaceDraft(){return fleetDraftEdited||companyDraft;}
 function isFleetEditing(){
  const focus=document.activeElement;
- return companySaving||cloud.busy||cloud.dirty||cloud.blocked||hasWorkspaceDraft()||hasInspectionDraft()||open!==null||docOpen!==null||pcOpen!==null||rvOpen!==null||ed!==null||cmp!==null||driverCnhEdit!==null||
+ return companySaving||cloud.busy||cloud.dirty||cloud.blocked||hasWorkspaceDraft()||hasInspectionDraft()||open!==null||docOpen!==null||pcOpen!==null||rvOpen!==null||ed!==null||cmp!==null||driverCnhEdit!==null||fineDueEdit!==null||
   (!!focus?.closest('#workspace')&&focus.matches('input,select,textarea'));
 }
 function isFleetViewControl(element){return !!element.closest('#company-form')||['vehicle-search','vehicle-status','vehicle-driver','alert-category','alert-severity','report-from','report-to','report-vehicle','report-driver','report-kind'].includes(element.id);}

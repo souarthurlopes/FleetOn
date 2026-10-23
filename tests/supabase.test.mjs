@@ -20,7 +20,7 @@ test('Migração PostgreSQL: isolamento RLS, RPC, conflito, validação e reapli
   await db.exec(`select set_config('request.jwt.claim.sub','11111111-1111-1111-1111-111111111111',false)`);
   let result=await db.query('select public.fleeton_get_fleet() as fleet');
   assert.deepEqual(result.rows[0].fleet,{version:0,state:{cars:[],drivers:[],log:[],fines:[]}});
-  const state={cars:[{id:1,placa:'ABC1234',modelo:'Teste',km:100,prox:10000,uso:null}],drivers:[],log:[],fines:[]};
+  const state={cars:[{id:1,placa:'ABC1234',modelo:'Teste',km:100,prox:10000,uso:null}],drivers:[],log:[],fines:[{id:1,placa:'ABC1234',data:'2026-10-23T10:00',vencimento:'2026-11-20',valor:100,desc:'Multa de teste',pago:false}]};
   result=await db.query('select public.fleeton_save_fleet($1,$2) as saved',[0,JSON.stringify(state)]);
   assert.equal(result.rows[0].saved.version,1);
   await assert.rejects(db.query('select public.fleeton_save_fleet($1,$2)',[0,JSON.stringify(state)]),/FLEET_CONFLICT/);

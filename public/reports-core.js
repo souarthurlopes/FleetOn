@@ -60,12 +60,12 @@
    const kmStart=numeric(l.km_inicio)??(l.tipo==='Saída'?numeric(l.km):numeric(start?.km_inicio)??numeric(start?.km));
    const kmEnd=l.tipo==='Devolução'?(numeric(l.km_fim)??numeric(l.km)):null;
    const distance=l.tipo==='Devolução'?(numeric(l.rodou)??(kmStart!==null&&kmEnd!==null&&kmEnd>=kmStart?kmEnd-kmStart:null)):null;
-   return {id:'log:'+index,index,source:'log',time,day:dayOf(time),plate:String(l.placa||''),model:model(l.placa),kind,type:String(l.tipo||'Outro'),driver:driver.name,driverKey:driver.key,kmStart,kmEnd,distance:distance!==null&&distance>=0?distance:null,liters:numeric(l.litros),amount:numeric(l.valor),description:String(l.det||''),payment:'',entry:l};
+   return {id:'log:'+index,index,source:'log',time,day:dayOf(time),plate:String(l.placa||''),model:model(l.placa),kind,type:String(l.tipo||'Outro'),driver:driver.name,driverKey:driver.key,kmStart,kmEnd,distance:distance!==null&&distance>=0?distance:null,liters:numeric(l.litros),amount:numeric(l.valor),description:String(l.det||''),payment:'',dueDate:'',entry:l};
   });
   for(const [index,f] of (state.fines||[]).entries()){
    const time=fineTime(f.data),dateOnly=typeof f.data==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(f.data)&&root.FleetInsights.civilDay(f.data)!==null?f.data:'';
    const driver=f.motorista?identity(f.motorista):responsible(f.placa,time);
-   result.push({id:'fine:'+index,index,source:'fine',time,day:dayOf(time)||dateOnly,plate:String(f.placa||''),model:model(f.placa),kind:'fines',type:'Multa',driver:driver.name,driverKey:driver.key,kmStart:null,kmEnd:null,distance:null,liters:null,amount:numeric(f.valor),description:String(f.desc||''),payment:f.pago?'Paga':'Pendente',entry:f});
+   result.push({id:'fine:'+index,index,source:'fine',time,day:dayOf(time)||dateOnly,plate:String(f.placa||''),model:model(f.placa),kind:'fines',type:'Multa',driver:driver.name,driverKey:driver.key,kmStart:null,kmEnd:null,distance:null,liters:null,amount:numeric(f.valor),description:String(f.desc||''),payment:f.pago?'Paga':'Pendente',dueDate:root.FleetInsights.fineDue(f).date,entry:f});
   }
   return result.sort((a,b)=>(Number.isFinite(b.time)?b.time:-Infinity)-(Number.isFinite(a.time)?a.time:-Infinity)||a.id.localeCompare(b.id));
  }
@@ -81,8 +81,8 @@
  }
  function timeLabel(row){return Number.isFinite(row.time)?new Date(row.time).toLocaleString('pt-BR',{timeZone:TZ,dateStyle:'short',timeStyle:'short'}):row.day?row.day.split('-').reverse().join('/'):'Sem data válida';}
  function csv(rows,company){
-  const header=['Data/hora (Brasília)','Placa','Modelo','Evento','Motorista','Km retirada','Km devolução','Km percorridos','Litros','Valor (R$)','Pagamento','Descrição'];
-  const data=rows.map(r=>[timeLabel(r),r.plate,r.model,r.type,r.driver,r.kmStart,r.kmEnd,r.distance,r.liters,r.amount,r.payment,r.description]);
+  const header=['Data/hora (Brasília)','Placa','Modelo','Evento','Motorista','Km retirada','Km devolução','Km percorridos','Litros','Valor (R$)','Pagamento','Descrição','Vencimento da multa'];
+  const data=rows.map(r=>[timeLabel(r),r.plate,r.model,r.type,r.driver,r.kmStart,r.kmEnd,r.distance,r.liters,r.amount,r.payment,r.description,r.dueDate?r.dueDate.split('-').reverse().join('/'):'']);
   if(company){header.push('Empresa','CNPJ da empresa');for(const row of data)row.push(company.name,company.cnpj);}
   return '\ufeff'+[header,...data].map(line=>line.map(csvCell).join(';')).join('\r\n');
  }

@@ -446,3 +446,22 @@ ficam na ficha **Ver detalhes**. Revisão, peças, documentos e remoção contin
 em **Mais ações**, acessível também por teclado. Retirar/devolver ficam visíveis.
 A prévia **Visão do motorista** fica no rodapé do menu lateral. Não há nova
 migração SQL nem alteração dos dados/permissões por essa organização visual.
+
+## Vencimento das multas
+
+Em **Multas**, informe **Vencimento (opcional)** separadamente da data/hora da
+infração. O calendário na coluna Vencimento permite incluir, corrigir ou limpar
+a data das multas existentes, com Salvar vencimento e Cancelar. Sem data, a lista
+mostra **Não informado**. Multas não pagas mostram **Vencida**, **Vence hoje** ou
+**A vencer**, usando o calendário de Brasília. As pagas mantêm a data sem aviso
+de atraso. A edição em aberto pausa a substituição automática dos dados.
+
+A ficha do veículo e os relatórios exibem o vencimento junto ao registro da
+multa, inclusive no PDF; o CSV inclui **Vencimento da multa**. Filtros de período
+continuam usando a data da infração, não a data do vencimento. A nova data fica
+no JSON da frota e acompanha backup e sincronização; não exige nova migração
+SQL. A data não dispara envio de e-mail ou notificação externa.
+
+Validação: `npm test` cobre datas e gravação PostgreSQL; `python3 tests/browser_fines.py`
+cobre cadastro, multas antigas, edição, cancelamento, pagamento, relatórios,
+CSV, persistência e celular em banco descartável.

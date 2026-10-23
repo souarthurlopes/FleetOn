@@ -19,6 +19,11 @@
   const title=days<0?`${label}: ${-days} dia${days===-1?'':'s'} em atraso`:days===0?`${label} vence hoje`:`${label} vence em ${days} dia${days===1?'':'s'}`;
   return {title,days,date,severity:days<=0?'urgent':'upcoming'};
  }
+ function fineDue(fine,now=new Date()) {
+  const valid=civilDay(fine.vencimento)!==null;
+  const days=valid?daysUntil(fine.vencimento,now):null;
+  return {date:valid?fine.vencimento:'',label:!valid?'Não informado':fine.pago?'Paga':days<0?'Vencida':days===0?'Vence hoje':'A vencer',urgent:valid&&!fine.pago&&days<=0};
+ }
  function kmAlert(label,due,current,threshold=500) {
   if(typeof due!=='number'||!Number.isFinite(due)||due<=0||typeof current!=='number'||!Number.isFinite(current))return null;
   const remaining=due-current;if(remaining>threshold)return null;
@@ -54,5 +59,5 @@
   if(filter.status==='attention'&&!vehicleAlerts(car,now).length)return false;
   return true;
  }
- root.FleetInsights={civilDay,today,daysUntil,dateAlert,kmAlert,vehicleAlerts,collect,normalize,matches};
+ root.FleetInsights={civilDay,today,daysUntil,dateAlert,fineDue,kmAlert,vehicleAlerts,collect,normalize,matches};
 })(globalThis);
