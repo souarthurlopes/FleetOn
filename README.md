@@ -19,8 +19,9 @@ Nenhum serviço foi criado ou publicado automaticamente por este repositório.
    [`supabase/001_fleeton.sql`](supabase/001_fleeton.sql) e execute.
    Depois execute também [`supabase/002_profiles_roles.sql`](supabase/002_profiles_roles.sql)
    para habilitar os perfis e as permissões. Para o checklist dos motoristas,
-   execute também [`supabase/003_inspection.sql`](supabase/003_inspection.sql). As migrações podem ser reaplicadas
-   na ordem 001 → 002 → 003 sem apagar os dados. Se já executou 001 e 002, execute apenas 003 para esta etapa.
+   execute também [`supabase/003_inspection.sql`](supabase/003_inspection.sql). Para a
+   atualização automática do gestor, execute [`supabase/004_auto_sync.sql`](supabase/004_auto_sync.sql). As migrações podem ser reaplicadas
+   na ordem 001 → 002 → 003 → 004 sem apagar os dados. Se já executou 001, 002 e 003, basta executar 004 nesta etapa.
 3. Em **Project Settings → API** (ou **API Keys**), copie a **Project URL** e a
    chave **publishable** (`sb_publishable_...`) ou a chave legada **anon**.
    São configurações públicas. Nunca use `service_role`, `sb_secret_...` ou a
@@ -147,8 +148,10 @@ aos dados depende do vínculo e cargo na equipe. As gravações só são permiti
 uma função que determina a conta pelo usuário autenticado, valida o conteúdo
 e exige a versão atual. A chave pública sozinha não dá acesso a dados privados.
 
-As alterações são gravadas ao confirmar uma ação. Em outro dispositivo, use
-**Atualizar dados** ou recarregue: não há atualização automática em tempo real.
+As alterações são gravadas ao confirmar uma ação. O gestor recebe mudanças de
+outra sessão por verificação automática a cada 20 segundos (com a migração 004
+ativada e sem edição em andamento). Para atualizar manualmente, use **Atualizar
+dados**. Motoristas continuam usando a atualização manual.
 Uma edição desatualizada é bloqueada sem sobrescrever o primeiro dispositivo.
 Exporte as alterações pendentes antes de atualizar e refaça a edição.
 Sem conexão, a tela conserva alterações para exportação, sem fila offline.
@@ -268,3 +271,35 @@ Validação adicional: `python3 tests/browser_inspection.py` usa banco SQLite
 temporário, fotos de teste e navegador real para verificar campos obrigatórios,
 compactação, erros de imagem, persistência e comparação no computador/celular.
 `npm test` também verifica o fluxo de motorista no PostgreSQL com as três migrações.
+
+## Atualização automática para o gestor
+
+Execute **supabase/004_auto_sync.sql** no SQL Editor após as migrações anteriores.
+Ela acrescenta uma consulta autenticada que devolve apenas versão, cargo e
+identificador da frota permitida; não expõe fotos, registros nem dados de terceiros.
+Nenhuma tabela ou registro existente é removido. Reaplicar a consulta é seguro.
+
+Na conta de gestor, o aplicativo verifica mudanças a cada **20 segundos** enquanto
+a aba está visível e também verifica ao retornar ao aplicativo. Quando há nova
+versão, atualiza Veículos, Em uso agora, histórico e alertas. O cabeçalho informa
+quando a frota foi verificada/atualizada. Não é um rastreamento GPS: o estado muda
+quando alguém confirma a retirada/devolução ou salva alterações.
+
+Sem mudanças, só a consulta leve é feita. A frota inteira (que pode incluir fotos)
+é baixada apenas quando necessário. Em falhas, os dados anteriores são mantidos,
+o indicador mostra a falha e as novas tentativas ficam mais espaçadas (até dois
+minutos). Verificações param ao sair da conta. A sincronização automática é do
+gestor; motoristas mantêm o fluxo manual e suas permissões existentes.
+
+Formulários, checklists com fotos, edições e comparações em aberto não são
+substituídos. Quando chegam novidades durante uma edição, uma mensagem avisa o
+gestor: termine/cancele a edição ou use **Atualizar dados**, confirmando o descarte
+do formulário quando aplicável. Os filtros de busca são preservados. Uma mudança
+de acesso interrompe a atualização e pede recarregar os dados da conta. As versões
+continuam impedindo que uma gravação desatualizada sobrescreva outra edição.
+
+Se a migração 004 ainda não foi aplicada, o indicador informa o requisito e não
+faz repetidas consultas completas. Depois de executar o SQL, clique em
+**Atualizar dados**. Os testes locais validam a função em PostgreSQL e usam duas
+sessões reais em `python3 tests/browser_sync.py` para verificar o temporizador,
+as mudanças de ocupação, rascunhos, respostas atrasadas, falha de rede e saída.

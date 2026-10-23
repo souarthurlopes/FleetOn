@@ -112,6 +112,9 @@ class Handler(BaseHTTPRequestHandler):
                     return self.reply(401, {'error': 'Entre na sua conta.'})
                 if path == '/api/session':
                     return self.reply(200, {'email': s[3], 'csrf': s[2]})
+                if path == '/api/fleetStatus':
+                    row=c.execute('SELECT version FROM fleets WHERE user_id=?',(s[1],)).fetchone()
+                    return self.reply(200, {'role':'manager','owner_id':s[1],'version':row[0] if row else 0})
                 if path == '/api/context':
                     row = c.execute('SELECT name,avatar FROM profiles WHERE user_id=?', (s[1],)).fetchone()
                     return self.reply(200, {'role':'manager', 'user_id':s[1], 'profile':{'name':row[0] if row else '', 'avatar':row[1] if row else ''}})
@@ -126,7 +129,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', str(len(raw)))
             self.end_headers()
             return self.wfile.write(raw)
-        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css', '/layout.js':'layout.js', '/layout.css':'layout.css', '/fleet-insights.js':'fleet-insights.js', '/fleet-tools.js':'fleet-tools.js', '/fleet-tools.css':'fleet-tools.css', '/inspection.js':'inspection.js', '/inspection-core.js':'inspection-core.js', '/inspection.css':'inspection.css'}
+        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css', '/layout.js':'layout.js', '/layout.css':'layout.css', '/fleet-insights.js':'fleet-insights.js', '/fleet-tools.js':'fleet-tools.js', '/fleet-tools.css':'fleet-tools.css', '/inspection.js':'inspection.js', '/inspection-core.js':'inspection-core.js', '/inspection.css':'inspection.css', '/auto-sync.js':'auto-sync.js'}
         if path not in files:
             return self.reply(404, {'error': 'Não encontrado.'})
         target = ROOT / 'public' / files[path]

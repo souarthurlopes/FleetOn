@@ -45,6 +45,7 @@ try:
             if path.startswith('/auth/v1/token'):return reply(session)
             if path.startswith('/auth/v1/user'):return reply(user)
             if path.startswith('/auth/v1/recover') or path.startswith('/auth/v1/logout'):return reply({})
+            if path.startswith('/rest/v1/rpc/fleeton_sync_status'):return reply({'role':profile_context['role'],'owner_id':profile_context['owner_id'],'version':fleet['version']})
             if path.startswith('/rest/v1/rpc/fleeton_context'):return reply(profile_context)
             if path.startswith('/rest/v1/rpc/fleeton_save_profile'):
                 args=req.post_data_json;profile_context['profile']={'name':args['p_name'],'avatar':args['p_avatar']};return reply(profile_context['profile'])
@@ -156,6 +157,12 @@ try:
         page.on('dialog',lambda d:d.accept());page.locator('#refresh').click();page.get_by_text('Dados carregados do servidor.',exact=True).wait_for()
         page.evaluate("window.dispatchEvent(new Event('fleeton-recovery'))")
         page.locator('#new-password').fill('new-password-123');page.get_by_role('button',name='Salvar senha',exact=True).click();page.locator('#user-email').wait_for()
+        # Missing optional sync migration is reported without downloading photos repeatedly.
+        context.route('**/rest/v1/rpc/fleeton_sync_status',lambda route:route.fulfill(status=404,headers={'Access-Control-Allow-Origin':'*'},content_type='application/json',body=json.dumps({'code':'PGRST202','message':'Could not find fleeton_sync_status'})))
+        page.evaluate('void pollFleetStatus()');expect(page.locator('#auto-sync-status')).to_contain_text('004_auto_sync.sql')
+        assert page.evaluate('fleetSyncSetupRequired')
+        context.unroute('**/rest/v1/rpc/fleeton_sync_status')
+        page.locator('#refresh').click();page.locator('#user-email').wait_for()
         profile_context['role']='driver'
         profile_context['owner_id']='22222222-2222-2222-2222-222222222222'
         fleet['state']['drivers']=[{'id':0,'nome':'Ana Lopes'}];fleet['state']['log']=[];fleet['state']['fines']=[]

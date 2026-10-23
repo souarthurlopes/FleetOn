@@ -121,7 +121,7 @@ body.mot .tabs,body.mot .gonly{display:none!important}
 </aside>
 <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Fechar menu" hidden></button>
 <main>
-<div id="account"></div><p id="sync-status" role="status" aria-live="polite"></p><div id="workspace" hidden>
+<div id="account"></div><p id="auto-sync-status" class="auto-sync-status" role="status" aria-live="polite" hidden></p><p id="sync-status" role="status" aria-live="polite"></p><div id="workspace" hidden>
 <h1>Controle de Frota</h1>
 
 
@@ -237,7 +237,7 @@ function fin(){
   const rows=S.fines.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(f=>`<tr><td>${new Date(f.data).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(f.placa)}</td><td>${esc(quem(f))}</td><td>${esc(f.desc)}</td><td>R$ ${fmt(f.valor)}</td><td><button class="btn sm ${f.pago?'sec':''}" data-go="payf:${f.id}">${f.pago?'Paga':'Pendente'}</button></td><td><button class="btn sm ico" data-go="delf:${f.id}" aria-label="Excluir multa">${pending('delf'+f.id)?'Confirmar?':ic('trash')}</button></td></tr>`).join('');
   $('#fin').innerHTML=`<div class="panel"><div class="form"><label>Veículo<select id="fc">${S.cars.map(c=>`<option value="${c.id}">${esc(c.placa)} · ${esc(c.modelo)}</option>`).join('')}</select></label><label>Data e hora da infração<input id="fd" type="datetime-local"></label><label>Valor (R$)<input id="fv" type="number" step="0.01" inputmode="decimal"></label><label>Descrição<input id="fo"></label><button class="btn" data-go="addf:0">${ic('plus')}Registrar multa</button></div></div>`+(rows?`<div class="panel scroll"><table><thead><tr><th>Infração</th><th>Veículo</th><th>Motorista</th><th>Descrição</th><th>Valor</th><th>Situação</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">Nenhuma multa registrada.</div>');
 }
-function render(){rolebar();dash();cars();drv();logForm();hist();fin();renderAlertCenter();$('#note').textContent=note;note=''}
+function render(){fleetDraftEdited=false;rolebar();dash();cars();drv();logForm();hist();fin();renderAlertCenter();$('#note').textContent=note;note=''}
 document.addEventListener('click',async e=>{
   const t=e.target.closest('.tab');
   if(t && cloud.context?.role==='driver')return;
@@ -305,6 +305,7 @@ $('h1').innerHTML='<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAA
 <script src="/fleet-tools.js"></script>
 <script src="/account.js"></script>
 <script src="/layout.js"></script>
+<script src="/auto-sync.js"></script>
 <script src="/cloud.js"></script>
 </body>
 </html>

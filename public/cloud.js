@@ -37,6 +37,7 @@ async function saveCloud() {
   }
 }
 function authScreen() {
+  stopFleetSync();
   resetFleetTools();
   layoutSignedOut();
   document.querySelector('#workspace').hidden=true;
@@ -74,6 +75,7 @@ function authScreen() {
 }
 async function enter(session) {
   if(window.FleetOnRemote?.recovering) {recoveryScreen();return;}
+  stopFleetSync();
   cloud.csrf=session.csrf;
   cloud.context=await api('context');
   const data=await api('fleet');
@@ -87,13 +89,16 @@ async function enter(session) {
   if(document.querySelector('#backup'))document.querySelector('#backup').onclick=exportBackup;
   document.querySelector('#logout').onclick=async()=>{
     if(cloud.busy) return;
+    if(hasWorkspaceDraft()&&!hasInspectionDraft()&&!confirm('Há um formulário em edição. Sair descarta essas informações. Deseja continuar?'))return;
     if(hasInspectionDraft()&&!confirm('O checklist em edição ainda não foi registrado. Sair descarta essas informações. Deseja continuar?'))return;
     if(cloud.dirty && !confirm('Há alterações não salvas. Exporte um backup antes de sair. Deseja sair mesmo assim?')) return;
+    stopFleetSync();
     try {await api('logout',{}); cloud.context=null; resetView({cars:[],drivers:[],log:[],fines:[]}); cloud.csrf=''; cloud.dirty=false; syncStatus.textContent=''; authScreen();}
-    catch(error){syncStatus.textContent=error.message;}
+    catch(error){syncStatus.textContent=error.message;startFleetSync();}
   };
   document.querySelector('#refresh').onclick=async()=>{
     if(cloud.busy) return;
+    if(hasWorkspaceDraft()&&!hasInspectionDraft()&&!confirm('Atualizar descarta as alterações do formulário em edição. Deseja continuar?'))return;
     if(hasInspectionDraft()&&!confirm('Atualizar descarta o checklist em edição. Deseja continuar?'))return;
     if(cloud.dirty && !confirm('Atualizar descarta as alterações não salvas. Já exportou o backup e deseja continuar?')) return;
     try{await enter(await api('session'));}catch(error){syncStatus.textContent=error.message;}
@@ -111,9 +116,11 @@ async function enter(session) {
     }catch(error){syncStatus.textContent=error.message;}
     finally{cloud.busy=false; event.target.value='';}
   };
+  startFleetSync();
 }
-window.addEventListener('beforeunload',event=>{if(cloud.dirty||hasInspectionDraft()){event.preventDefault();event.returnValue='';}});
+window.addEventListener('beforeunload',event=>{if(cloud.dirty||hasInspectionDraft()||hasWorkspaceDraft()){event.preventDefault();event.returnValue='';}});
 function recoveryScreen() {
+  stopFleetSync();
   layoutSignedOut();
   document.querySelector('#workspace').hidden=true;
   account.innerHTML=`<div class="panel"><h2>Crie uma nova senha</h2><form id="recovery-form"><label>Nova senha<input id="new-password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label><button class="btn" type="submit">Salvar senha</button><p id="recovery-error" role="alert"></p></form></div>`;
