@@ -109,9 +109,10 @@ projeto Supabase real.
 ## Dados, contas e sincronização
 
 Cada conta nova começa como **gestor da própria frota**, sem acesso às demais.
-O gestor abre **Meu perfil → Equipe** e convida motoristas pelo e-mail.
-O motorista cria uma conta com esse mesmo e-mail, confirma o cadastro e entra
-automaticamente como motorista ao acessar o aplicativo. O convite fica no aplicativo; não
+Em **Meu perfil → Equipe**, o dono convida gestores ou motoristas pelo e-mail
+e escolhe o cargo. O convidado cria a conta com o mesmo e-mail, confirma o
+cadastro e entra automaticamente na frota com o cargo escolhido. Gestores
+convidados também podem convidar e remover motoristas. O convite fica no aplicativo; não
 envia e-mail automaticamente. Nesta versão, uma conta participa de uma frota.
 Uma conta com frota própria preenchida/equipe não pode aceitar outra frota: use
 uma conta nova ou vazia. Convites pendentes da própria equipe devem ser cancelados
@@ -359,9 +360,10 @@ custos, fotos, CSV/PDF completos, navegação, persistência e celular).
 ## Entrada automática dos convidados
 
 Ao entrar com um e-mail confirmado que tem convite pendente, o aplicativo conclui
-o vínculo como motorista antes de carregar a frota. O cargo fica salvo no banco
-e vale nos próximos acessos. Não é preciso clicar em Aceitar convite nem aplicar
-outra migração SQL. O botão Convidar motorista registra o convite no aplicativo;
+o vínculo com o cargo do convite antes de carregar a frota. O cargo fica salvo no banco
+e vale nos próximos acessos. Não é preciso clicar em Aceitar convite. Para
+convidar gestores, aplique a migração 007 descrita abaixo. O botão de convite
+registra o convite no aplicativo;
 ele não envia e-mail. O convidado deve cadastrar-se com o endereço convidado e
 confirmá-lo. Contas com outra frota/dados continuam protegidas pelas validações
 existentes; se o vínculo falhar, o login informa o erro sem abrir a área do gestor.
@@ -391,3 +393,36 @@ usam o último cadastro salvo. A API local possui cadastro equivalente por conta
 Validação: `npm test`, `python3 tests/browser_company.py` e regressões de
 relatórios, permissões Supabase e sincronização. Os testes utilizam bancos
 locais descartáveis e APIs simuladas, sem cadastrar empresas no projeto real.
+
+## Gestores convidados
+
+Execute **supabase/007_manager_invites.sql** após 001 a 006 e clique em
+**Atualizar dados**. A atualização preserva contas, frotas, empresa e convites
+pendentes: os convites antigos continuam com cargo Motorista. Sem 007, a área de
+equipe explica a atualização necessária; não envia um convite de gestor como
+motorista silenciosamente. O script pode ser reaplicado. Não reaplique migrações
+antigas isoladamente após a nova, pois elas definem versões anteriores das funções.
+
+O dono abre **Meu perfil → Equipe**, informa e-mail, escolhe **Gestor** ou
+**Motorista** e confirma o convite. O cadastro e a confirmação do endereço continuam
+necessários; o convite é concluído automaticamente no próximo acesso. O cargo é
+definido pelo convite gravado no banco, sem opção de auto promoção no cadastro.
+Não há envio de e-mail por esse botão. Uma conta continua ligada a uma só frota;
+contas com frota própria preenchida/equipe não são transferidas automaticamente.
+
+Gestores convidados acessam os mesmos veículos, documentos, fotos, histórico,
+finanças, relatórios, empresa e versão da frota. Podem cadastrar veículos, salvar
+alterações e administrar motoristas. Apenas o dono pode convidar, cancelar
+convites ou remover acessos de gestores. O dono não pode ser removido pela equipe
+e ninguém remove a própria conta por esse formulário. O cargo aparece na lista
+de integrantes e nos convites pendentes. Para trocar o cargo de um integrante,
+o dono remove o acesso e convida novamente; não é permitido remover um motorista
+com veículo em uso. Revogar um gestor impede novas gravações na frota/empresa;
+a sincronização detecta a mudança de vínculo. Dados já baixados não são apagados
+remotamente do navegador.
+
+Compartilhamento de equipes funciona no backend Supabase; a API Python local
+continua com frotas isoladas por conta. Validação: `npm test` cobre a migração e
+permissões em PostgreSQL e `python3 tests/browser_supabase.py` verifica escolha
+de cargo, convite e entrada automática de gestor/motorista com o SDK real e APIs
+simuladas. Não são criadas contas no Supabase real pelos testes.

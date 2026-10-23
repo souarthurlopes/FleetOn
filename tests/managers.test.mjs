@@ -1,0 +1,60 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {PGlite} from '@electric-sql/pglite';
+
+test('Gestores convidados compartilham frota/empresa sem promover motoristas ou cruzar empresas',async()=>{
+ const db=new PGlite(),owner='11111111-1111-1111-1111-111111111111',manager='22222222-2222-2222-2222-222222222222',driver='33333333-3333-3333-3333-333333333333',other='44444444-4444-4444-4444-444444444444',fresh='55555555-5555-5555-5555-555555555555';
+ const identity=uid=>db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);
+ const call=async(fn,args=[])=> (await db.query(`select public.${fn}(${args.map((_,i)=>'$'+(i+1)).join(',')}) as result`,args)).rows[0].result;
+ const sql=async file=>readFile(new URL('../supabase/'+file,import.meta.url),'utf8');
+ try{
+  await db.exec(`create role anon;create role authenticated;create schema auth;grant usage on schema auth to authenticated,anon;
+   create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
+   create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;`);
+  await db.query('insert into auth.users values($1,$2,now()),($3,$4,now()),($5,$6,now()),($7,$8,now()),($9,$10,null)',[owner,'owner@test.com',manager,'manager@test.com',driver,'driver@test.com',other,'other@test.com',fresh,'fresh@test.com']);
+  for(const f of ['001_fleeton.sql','002_profiles_roles.sql','003_inspection.sql','004_auto_sync.sql','005_trip_odometer.sql','006_company.sql'])await db.exec(await sql(f));
+  await db.exec('set role authenticated');await identity(owner);await call('fleeton_context');await call('fleeton_get_fleet');
+  // A pending legacy invitation must remain a driver invitation after migration.
+  await call('fleeton_team',['invite','driver@test.com']);
+  await db.exec('reset role');await db.exec(await sql('007_manager_invites.sql'));await db.exec(await sql('007_manager_invites.sql'));
+  await db.exec('set role anon');await assert.rejects(call('fleeton_team_roles'),/permission denied/);
+  await db.exec('set role authenticated');await identity(owner);
+  let team=await call('fleeton_team_roles');assert.equal(team.invites[0].role,'driver');
+  const state={cars:[{id:1,placa:'ABC1234',modelo:'Uno',km:100,prox:10000,uso:null}],drivers:[],log:[],fines:[]};
+  await call('fleeton_save_fleet',[0,JSON.stringify(state)]);
+  await call('fleeton_team_roles',['invite','manager@test.com','manager']);
+  await identity(manager);assert.equal((await call('fleeton_context')).invitation.role,'manager');
+  const ctx=await call('fleeton_accept_invite');assert.equal(ctx.role,'manager');assert.equal(ctx.owner_id,owner);assert.equal(ctx.is_owner,false);
+  assert.deepEqual((await call('fleeton_get_fleet')).state,state);
+  state.cars[0].modelo='Modelo editado pelo gestor';await call('fleeton_save_fleet',[1,JSON.stringify(state)]);
+  const company={name:'Empresa compartilhada',cnpj:'',phone:'',address:'',logo:''};await call('fleeton_save_company',[JSON.stringify(company)]);
+  assert.equal((await call('fleeton_sync_status')).owner_id,owner);
+  await assert.rejects(call('fleeton_team_roles',['invite','other@test.com','manager']),/TEAM_OWNER_ONLY/);
+  await assert.rejects(call('fleeton_team_roles',['remove','owner@test.com']),/TEAM_SELF/);
+  await identity(owner);assert.deepEqual((await call('fleeton_get_fleet')).state,state);assert.deepEqual(await call('fleeton_get_company'),company);
+  team=await call('fleeton_team_roles');assert.equal(team.members[0].role,'manager');
+  await assert.rejects(call('fleeton_save_fleet',[1,JSON.stringify(state)]),/FLEET_CONFLICT/);
+  await identity(driver);assert.equal((await call('fleeton_accept_invite')).role,'driver');
+  await assert.rejects(call('fleeton_team_roles',['invite','other@test.com','manager']),/FLEET_FORBIDDEN/);
+  await assert.rejects(call('fleeton_save_fleet',[2,JSON.stringify(state)]),/FLEET_FORBIDDEN/);
+  await assert.rejects(call('fleeton_save_company',[JSON.stringify(company)]),/FLEET_FORBIDDEN/);
+  assert.equal((await call('fleeton_get_fleet')).state.cars[0].modelo,state.cars[0].modelo);
+  const inspection={version:1,fuel:'Cheio',items:{exterior:'ok',interior:'ok',tires:'ok',lights:'ok',equipment:'ok'},notes:'',photos:{},confirmed:true};
+  await call('fleeton_driver_odometer',[2,1,'out',110,'Cliente',JSON.stringify(inspection)]);
+  await identity(manager);await assert.rejects(call('fleeton_team_roles',['remove','driver@test.com']),/TEAM_ACTIVE_TRIP/);
+  await identity(driver);await call('fleeton_driver_odometer',[3,1,'in',125,'',JSON.stringify(inspection)]);
+  await identity(manager);await call('fleeton_team_roles',['remove','driver@test.com']);
+  await call('fleeton_team_roles',['invite','driver@test.com','driver']);
+  await identity(owner);await call('fleeton_team_roles',['invite','fresh@test.com','manager']);
+  await identity(manager);await assert.rejects(call('fleeton_team_roles',['remove','fresh@test.com']),/TEAM_OWNER_ONLY/);
+  await assert.rejects(call('fleeton_team_roles',['invite','fresh@test.com','driver']),/TEAM_OWNER_ONLY/);
+  await identity(fresh);await assert.rejects(call('fleeton_accept_invite'),/TEAM_NO_INVITE/);
+  await identity(other);await call('fleeton_context');assert.equal((await call('fleeton_get_fleet')).state.cars.length,0);assert.equal(await call('fleeton_get_company'),null);
+  await assert.rejects(db.query("update public.fleeton_members set role='manager'"),/permission denied/);
+  await identity(owner);await call('fleeton_team_roles',['remove','manager@test.com']);
+  await identity(manager);await assert.rejects(call('fleeton_save_fleet',[4,JSON.stringify(state)]),/FLEET_FORBIDDEN/);
+  await assert.rejects(call('fleeton_save_company',[JSON.stringify(company)]),/FLEET_FORBIDDEN/);
+  assert.equal((await call('fleeton_get_fleet')).state.cars.length,0);
+ }finally{await db.close();}
+});

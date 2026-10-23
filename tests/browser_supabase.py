@@ -51,12 +51,12 @@ try:
             if path.startswith('/rest/v1/rpc/fleeton_context'):return reply(profile_context)
             if path.startswith('/rest/v1/rpc/fleeton_accept_invite'):
                 if invite_failure['enabled']:return reply({'code':'P0001','message':'TEAM_OTHER_FLEET'},400)
-                profile_context.update(role='driver',owner_id='22222222-2222-2222-2222-222222222222',invitation=None);return reply(profile_context)
+                profile_context.update(role=profile_context['invitation'].get('role','driver'),is_owner=False,owner_id='22222222-2222-2222-2222-222222222222',invitation=None);return reply(profile_context)
             if path.startswith('/rest/v1/rpc/fleeton_save_profile'):
                 args=req.post_data_json;profile_context['profile']={'name':args['p_name'],'avatar':args['p_avatar']};return reply(profile_context['profile'])
             if path.startswith('/rest/v1/rpc/fleeton_team'):
                 args=req.post_data_json
-                if args['p_action']=='invite':team['invites']=[{'email':args['p_email']}]
+                if args['p_action']=='invite':team['invites']=[{'email':args['p_email'],'role':args['p_role']}]
                 if args['p_action']=='remove':team['invites']=[]
                 return reply(team)
             if path.startswith('/rest/v1/rpc/fleeton_driver_odometer'):
@@ -87,7 +87,10 @@ try:
         assert page.locator('#profile-name').inner_text()=='Ana Lopes'
         assert profile_context['profile']['avatar'].startswith('data:image/jpeg;base64,')
         page.locator('#invite-email').fill('driver@example.com');page.get_by_role('button',name='Convidar motorista',exact=True).click()
-        page.get_by_text('driver@example.com · Convite pendente',exact=True).wait_for()
+        page.get_by_text('driver@example.com · Motorista · Convite pendente',exact=True).wait_for()
+        page.locator('#invite-role').select_option('manager');page.locator('#invite-email').fill('new-manager@example.com');page.get_by_role('button',name='Convidar gestor',exact=True).click()
+        page.get_by_text('new-manager@example.com · Gestor · Convite pendente',exact=True).wait_for();assert team['invites'][0]['role']=='manager'
+        expect(page.locator('#invite-role')).to_have_value('driver')
         page.locator('[data-t="dash"]').click()
         assert page.locator('#profile-navigation').get_attribute('aria-current')=='false'
         page.screenshot(path='/tmp/fleeton-profile.png',full_page=True,animations='disabled')
@@ -168,6 +171,20 @@ try:
         assert page.evaluate('fleetSyncSetupRequired')
         context.unroute('**/rest/v1/rpc/fleeton_sync_status')
         page.locator('#refresh').click();page.locator('#user-email').wait_for()
+        # Missing roles migration never silently downgrades a manager invitation.
+        context.route('**/rest/v1/rpc/fleeton_team_roles',lambda route:route.fulfill(status=404,headers={'Access-Control-Allow-Origin':'*'},content_type='application/json',body=json.dumps({'code':'PGRST202','message':'fleeton_team_roles missing'})))
+        page.reload();page.locator('#user-email').wait_for();page.locator('#profile-navigation').click();expect(page.locator('#team-status')).to_contain_text('007_manager_invites.sql')
+        context.unroute('**/rest/v1/rpc/fleeton_team_roles')
+        # A manager invitation is accepted before reading the shared fleet.
+        profile_context['invitation']={'email':'owner@example.com','role':'manager'}
+        manager_start=len(calls);page.reload();page.locator('#user-email').wait_for();expect(page.locator('#profile-role')).to_have_text('Gestor')
+        assert next(i for i,x in enumerate(calls[manager_start:]) if '/fleeton_accept_invite' in x)<next(i for i,x in enumerate(calls[manager_start:]) if '/fleeton_get_fleet' in x)
+        page.locator('#profile-navigation').click();assert page.locator('#invite-role option[value=manager]').evaluate('(option)=>option.disabled')
+        expect(page.locator('.team-row button')).to_have_count(0)
+        page.locator('[data-t="reports"]').click();expect(page.locator('#reports')).to_be_visible()
+        page.locator('[data-t="company"]').click();expect(page.locator('#company-name')).to_be_enabled()
+        page.screenshot(path='/tmp/fleeton-invited-manager.png',full_page=True,animations='disabled')
+        profile_context.update(owner_id=user['id'],is_owner=True)
         context.route('**/rest/v1/rpc/fleeton_get_company',lambda route:route.fulfill(status=404,content_type='application/json',headers={'Access-Control-Allow-Origin':'*'},body=json.dumps({'code':'PGRST202','message':'fleeton_get_company missing'})))
         page.reload();page.locator('#user-email').wait_for();page.locator('[data-t="company"]').click();expect(page.locator('#company-status')).to_contain_text('006_company.sql');expect(page.locator('#company-name')).to_be_disabled()
         page.locator('[data-t="car"]').click();expect(page.locator('#car')).to_be_visible()
