@@ -21,7 +21,7 @@ with tempfile.TemporaryDirectory() as tmp:
             page.locator('#email').fill('inspection@example.com');page.locator('#password').fill('inspection-test-password');page.get_by_role('button',name='Criar conta',exact=True).click();page.locator('#user-email').wait_for()
             page.locator('[data-t="drv"]').click();page.locator('#dn').fill('Ana da Frota');page.locator('[data-go="addd:0"]').click();page.wait_for_function('!cloud.busy')
             page.locator('[data-t="car"]').click();page.locator('#np').fill('CHECK123');page.locator('#nm').fill('Carro de teste');page.locator('#nk').fill('100');page.locator('#nr').fill('10000');page.locator('[data-go="add:0"]').click();page.wait_for_function('!cloud.busy')
-            page.locator('[data-go^="open:"]').click();page.wait_for_function('!cloud.busy');page.locator('#dest').fill('Cliente')
+            page.locator('[data-go^="open:"]').click();page.wait_for_function('!cloud.busy');page.locator('#dest').fill('Av. São João, 123, São Paulo - SP & Loja #2')
             page.locator('[data-go^="out:"]').click();expect(page.locator('#sync-status')).to_have_text('Informe o km da retirada, igual ou maior que o último registrado.')
             page.locator('#kmi').fill('99');page.locator('[data-go^="out:"]').click();expect(page.locator('#sync-status')).to_have_text('Informe o km da retirada, igual ou maior que o último registrado.')
             page.locator('#kmi').fill('110')
@@ -48,6 +48,9 @@ with tempfile.TemporaryDirectory() as tmp:
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             page.screenshot(path='/tmp/fleeton-checklist-mobile.png',full_page=True,animations='disabled')
             page.locator('[data-go^="out:"]').click();page.wait_for_function('!cloud.busy && S.cars[0].uso!==null')
+            route=page.locator('#car .vehicle-route');expect(route).to_be_visible();assert route.get_attribute('target')=='_blank'
+            from urllib.parse import urlparse, parse_qs
+            assert parse_qs(urlparse(route.get_attribute('href')).query)['destination']==['Av. São João, 123, São Paulo - SP & Loja #2']
             saved=page.evaluate('S.log[0]');assert len(saved['inspection']['photos'])==2 and saved['trip_id']
             assert saved['km']==110 and page.evaluate('S.cars[0].uso.kmIni')==110
             assert all(len(photo)<=65536 for photo in saved['inspection']['photos'].values())
@@ -57,6 +60,7 @@ with tempfile.TemporaryDirectory() as tmp:
             page.locator('[data-inspection-item="exterior"]').select_option('damage');page.locator('[data-inspection-item="tires"]').select_option('damage');page.locator('#av').fill('Risco antigo e dano no pneu traseiro');page.locator('#inspection-confirm').check()
             page.locator('[data-inspection-photo="front"]').set_input_files(image);expect(page.locator('[data-inspection-status="front"]')).to_have_text('Foto pronta.')
             page.locator('[data-go^="in:"]').click();page.wait_for_function('!cloud.busy && S.cars[0].uso===null')
+            expect(page.locator('#car .vehicle-route')).to_have_count(0)
             assert page.evaluate('S.log[0].trip_id===S.log[1].trip_id')
             assert page.evaluate('S.log[1].rodou')==15 and page.evaluate('S.log[1].km_fim')==125
             page.locator('#menu-toggle').click();page.locator('[data-t="hist"]').click();page.locator('[data-go="cmp:1"]').click();page.wait_for_function('!cloud.busy')

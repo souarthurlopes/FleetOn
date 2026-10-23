@@ -224,6 +224,7 @@ try:
         assert page.evaluate('S.cars[0].uso===null');expect(page.locator('#detail')).to_be_empty();expect(page.locator('[data-vehicle-qr]:visible')).to_have_count(0)
         page.locator('.car:visible [data-go^="open:"]').click();page.locator('#dest').fill('Cliente');page.locator('#kmi').fill('100');page.locator('#comb').select_option('Cheio');page.locator('#inspection-confirm').check();page.locator('[data-go^="out:"]').click()
         page.get_by_text('Viagem registrada.',exact=True).wait_for();assert fleet['state']['cars'][0]['uso']['user_id']==user['id']
+        expect(page.locator('.car:visible .vehicle-route')).to_have_attribute('href','https://www.google.com/maps/dir/?api=1&destination=Cliente&travelmode=driving')
         page.locator('.car:visible [data-go^="open:"]').click();page.locator('#kmf').fill('125');page.locator('#comb').select_option('1/2');page.locator('#inspection-confirm').check();page.locator('[data-go^="in:"]').click()
         page.wait_for_function("document.querySelector('.meta').textContent.includes('125')")
         assert fleet['state']['cars'][0]['km']==125

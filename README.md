@@ -501,3 +501,23 @@ Validação: `npm test` usa `jsqr` como leitor independente; `python3 tests/brow
 decodifica o PNG efetivamente baixável e verifica etiqueta PDF, celular, acesso
 após login, veículo removido e isolamento entre empresas. O contrato de Supabase
 verifica seleção exata para motorista, incluindo cadastros com mesma placa.
+
+## Rotas no Google Maps
+
+Na retirada, preencha **Destino / endereço** com rua, número, bairro, cidade e
+estado. O endereço é salvo no destino da viagem, nos campos existentes da frota
+e do histórico. Depois da confirmação, **Abrir rota no Google Maps** aparece no
+cartão do veículo em uso e na visão geral da ficha do gestor. Funciona também
+para motoristas. Após devolver o veículo, o botão deixa de aparecer.
+
+O link abre o Google Maps em outra aba/aplicativo, em modo carro e com o destino
+preenchido. A origem/localização é escolhida no próprio Maps. Não há mapa embutido,
+autocomplete, rastreamento, chave de API ou cobrança de API do Maps pelo FleetOn.
+O Google só recebe o destino ao abrir o link. Destinos antigos também podem ser
+abertos, mas textos como “Cliente” podem ser ambíguos: confira o endereço e o
+trajeto no Maps. Não é preciso nova migração SQL. A navegação exige conexão e
+segue a disponibilidade do aplicativo/serviço Google Maps no dispositivo.
+
+`npm test` valida a codificação dos endereços. Os testes de navegador verificam a
+rota no fluxo de retirada/devolução, endereço persistido, motorista e ficha do
+gestor, sem enviar endereços reais ao Google durante os testes.
