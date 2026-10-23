@@ -197,7 +197,7 @@ com WAL ativo, copiar somente o arquivo principal pode perder alterações.
 No computador, a barra lateral reúne a marca, as seções da frota e o perfil.
 **Meu perfil** abre os dados pessoais, backup/importação e a equipe do gestor
 em uma área própria. No celular, o botão de menu abre a navegação; toque fora
-ou pressione Escape para fechar. O botão de tema no cabeçalho alterna claro/escuro
+ou pressione Escape para fechar. A identidade visual combina azul-marinho e azul elétrico. O botão de tema no cabeçalho alterna claro/escuro
 e guarda a escolha no dispositivo. As transições respeitam movimento reduzido.
 A identidade do usuário e as permissões continuam determinadas pelo banco.
 Alterações visuais são publicadas pelo build/deploy do Cloudflare, sem migração
