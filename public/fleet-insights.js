@@ -52,6 +52,7 @@
  }
  const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
  function matches(car,filter,now=new Date()) {
+  if(filter.id!==undefined&&filter.id!==null&&String(car.id)!==String(filter.id))return false;
   if(filter.query&&!normalize(`${car.placa} ${car.modelo} ${car.uso?.mot||''}`).includes(normalize(filter.query)))return false;
   if(filter.driver&&car.uso?.mot!==filter.driver)return false;
   if(filter.status==='available'&&car.uso)return false;

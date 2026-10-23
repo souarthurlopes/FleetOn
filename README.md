@@ -465,3 +465,35 @@ SQL. A data não dispara envio de e-mail ou notificação externa.
 Validação: `npm test` cobre datas e gravação PostgreSQL; `python3 tests/browser_fines.py`
 cobre cadastro, multas antigas, edição, cancelamento, pagamento, relatórios,
 CSV, persistência e celular em banco descartável.
+
+## QR Code de cada veículo
+
+Na conta de gestor, abra **Veículos → Ver detalhes → QR Code**, ou **Mais ações
+→ QR Code** no cartão. A etiqueta contém QR, empresa (quando cadastrada), placa,
+modelo e orientação de acesso. É possível **Baixar PNG**, **Imprimir etiqueta**
+(padrão de 85 mm de largura; use papel/escala da impressora) e **Copiar link**.
+Imprima em boa qualidade, sem recortar a margem branca do código. A impressão
+mostra apenas a etiqueta. PNG e geração do código acontecem no próprio navegador,
+sem enviar os dados a um serviço de QR externo. O gerador `qrcode` é incluído no
+build, junto ao SDK do Supabase, sem dependência de CDN em execução.
+
+O link usa o domínio no qual o FleetOn está aberto, mais identificadores de frota
+e veículo no fragmento. Gere as etiquetas no domínio definitivo de produção; uma
+etiqueta criada no localhost/preview aponta para esse ambiente. Se mudar domínio,
+placa ou nome impresso da empresa, gere a etiqueta novamente. Alterar placa/modelo
+não muda o identificador do veículo. Excluir e cadastrar outro veículo exige um
+novo QR; o código antigo não recria veículos removidos.
+
+Ao escanear, é necessário fazer login com uma conta autorizada na empresa. O
+link permanece na página de login e é aplicado após entrar: gestor abre a ficha;
+motorista vê o veículo exato na lista para escolher Retirar/Devolver. Não há baixa
+ou retirada automática: km, checklist e confirmação continuam obrigatórios. A
+busca/limpeza dos filtros permite voltar aos demais veículos. Etiquetas de outra
+empresa não concedem acesso nem disparam consultas aos dados dela. Os registros
+continuam protegidos pelas funções autenticadas existentes. Não é preciso nova
+migração SQL e não há uma página pública de informações do carro.
+
+Validação: `npm test` usa `jsqr` como leitor independente; `python3 tests/browser_qr.py`
+decodifica o PNG efetivamente baixável e verifica etiqueta PDF, celular, acesso
+após login, veículo removido e isolamento entre empresas. O contrato de Supabase
+verifica seleção exata para motorista, incluindo cadastros com mesma placa.

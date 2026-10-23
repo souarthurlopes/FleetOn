@@ -36,7 +36,7 @@ function renderAlertCenter() {
  const shortcut=document.querySelector('#alerts-shortcut');if(shortcut){shortcut.setAttribute('aria-label',`Central de alertas: ${alerts.length} pendências`);shortcut.querySelector('.alert-count').textContent=alerts.length||'';}
 }
 document.addEventListener('input',event=>{
- if(event.target.id==='vehicle-search'){vehicleFilter.query=event.target.value;applyVehicleFilters();}
+ if(event.target.id==='vehicle-search'){vehicleFilter.query=event.target.value;delete vehicleFilter.id;applyVehicleFilters();}
 });
 document.addEventListener('change',event=>{
  if(event.target.id==='vehicle-status'){vehicleFilter.status=event.target.value;applyVehicleFilters();}

@@ -111,6 +111,7 @@ body.mot .tabs,body.mot .gonly{display:none!important}
 <link rel="stylesheet" href="/vehicle-reports.css">
 <link rel="stylesheet" href="/company.css">
 <link rel="stylesheet" href="/simplified.css">
+<link rel="stylesheet" href="/vehicle-qr.css">
 </head>
 <body>
 <aside class="app-sidebar" id="app-sidebar" aria-label="Menu principal" hidden>
@@ -215,7 +216,7 @@ function cars(){
   let h='<div class="grid">'+S.cars.map(c=>{
     const al=alertas(c),cls=c.uso?'uso':al.length?'rev':'';
     const st=c.uso?'<span class="badge emuso">Em uso</span>':'<span class="badge livre">Disponível</span>';
-    let act=`<button class="btn sm" data-go="open:${c.id}">${ic(c.uso?'undo':'key')}${c.uso?'Devolver':'Retirar'}</button> <details class="vehicle-options gonly"><summary>Mais ações</summary><div class="vehicle-options-content"><button class="btn sm sec gonly" data-go="revis:${c.id}">${ic('cal')}Revisão</button> <button class="btn sm ico gonly" data-go="pecas:${c.id}" title="Peças" aria-label="Peças">${ic('tool')}</button> <button class="btn sm ico gonly" data-go="docs:${c.id}" title="Documentos" aria-label="Documentos">${ic('file')}</button> <button class="btn sm ico gonly" data-go="del:${c.id}" title="Remover" aria-label="Remover">${ic('trash')}</button></div></details>`;
+    let act=`<button class="btn sm" data-go="open:${c.id}">${ic(c.uso?'undo':'key')}${c.uso?'Devolver':'Retirar'}</button> <details class="vehicle-options gonly"><summary>Mais ações</summary><div class="vehicle-options-content"><button class="btn sm sec gonly" data-go="revis:${c.id}">${ic('cal')}Revisão</button> <button class="btn sm ico gonly" data-go="pecas:${c.id}" title="Peças" aria-label="Peças">${ic('tool')}</button> <button class="btn sm ico gonly" data-go="docs:${c.id}" title="Documentos" aria-label="Documentos">${ic('file')}</button> <button class="btn sm ico gonly" data-go="del:${c.id}" title="Remover" aria-label="Remover">${ic('trash')}</button><button type="button" class="btn sm sec" data-vehicle-qr="${c.id}">QR Code</button></div></details>`;
     if(cloud.context?.role==='driver' && c.uso && c.uso.user_id!==cloud.context.user_id)act='<span class="meta">Veículo em uso por outro motorista</span>';
     if(open===c.id)act=`<div class="form" style="margin-top:8px">${c.uso?`<label>Km na devolução<input id="kmf" type="number" inputmode="numeric" min="${esc(c.km)}" placeholder="A partir de ${esc(c.km)} km" required></label>`:`<label>Motorista<select id="mot">${S.drivers.map(d=>`<option value="${d.id}">${esc(d.nome)}</option>`).join('')}</select></label><label>Destino<input id="dest" maxlength="300"></label><label>Km na retirada<input id="kmi" type="number" inputmode="numeric" min="${esc(c.km)}" placeholder="Último registrado: ${esc(c.km)} km" required></label>`}${chk(c)}<button class="btn sm" data-go="${c.uso?'in':'out'}:${c.id}">${c.uso?'Confirmar devolução':'Confirmar saída'}</button><button class="btn sm sec" data-go="cancel:0">Cancelar</button></div>`;
     if(docOpen===c.id)act=`<div class="form" style="margin-top:8px"><label>IPVA vence em<input id="d1" type="date" value="${esc(c.ipva||'')}"></label><label>Licenciamento vence em<input id="d2" type="date" value="${esc(c.lic||'')}"></label><label>Seguro vence em<input id="d3" type="date" value="${esc(c.seg||'')}"></label><button class="btn sm" data-go="savedocs:${c.id}">Salvar datas</button><button class="btn sm sec" data-go="cancel:0">Cancelar</button></div>`;
@@ -324,6 +325,9 @@ $('h1').innerHTML='<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAA
 <script src="/auto-sync.js"></script>
 <script src="/company.js"></script>
 <script src="/simplified.js"></script>
+<script src="/vendor/qrcode.js"></script>
+<script src="/qr-links.js"></script>
+<script src="/vehicle-qr.js"></script>
 <script src="/cloud.js"></script>
 </body>
 </html>

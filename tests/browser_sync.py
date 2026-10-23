@@ -66,6 +66,7 @@ with tempfile.TemporaryDirectory() as tmp:
             expect(manager.locator('#auto-sync-status')).to_contain_text('Há novidades')
             assert manager.locator('#np').input_value()=='RACE999' and manager.evaluate('S.cars[0].uso') is None
             manager.unroute('**/api/fleet');manager.locator('#refresh').click();manager.locator('#user-email').wait_for()
+            manager.wait_for_function("!hasWorkspaceDraft() && S.cars[0]?.uso?.mot==='Ana da Frota'")
             # A network failure must retain the last fleet and show its stale state.
             manager.route('**/api/fleetStatus',lambda route:route.abort())
             manager.evaluate('void pollFleetStatus()');expect(manager.locator('#auto-sync-status')).to_contain_text('Não foi possível verificar')

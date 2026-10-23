@@ -14,6 +14,7 @@ if (key && !key.startsWith('sb_publishable_')) {
 }
 if (url && (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url))) throw new Error('Use a URL HTTPS do projeto Supabase.');
 await build({entryPoints:['src/supabase-sdk.js'], outfile:'public/vendor/supabase.js', bundle:true, minify:true, format:'iife', globalName:'FleetOnSupabase', target:'es2022', legalComments:'eof'});
+await build({entryPoints:['src/qr-sdk.js'],outfile:'public/vendor/qrcode.js',bundle:true,minify:true,format:'iife',globalName:'FleetOnQRCode',platform:'browser',target:'es2022',legalComments:'eof'});
 await rm('dist', {recursive:true,force:true}); await mkdir('dist', {recursive:true}); await cp('public', 'dist', {recursive:true});
 if(url) await writeFile('dist/config.js', 'window.FLEETON_CONFIG = '+JSON.stringify({backend:'supabase',supabaseUrl:url,supabasePublishableKey:key})+';\n');
 const config=await readFile('dist/config.js','utf8');

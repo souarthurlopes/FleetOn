@@ -38,6 +38,7 @@ async function saveCloud() {
   }
 }
 function authScreen() {
+  closeVehicleQR();
   stopFleetSync();
   resetFleetTools();
   dashboardAnalyticsOpen=false;
@@ -96,6 +97,7 @@ async function enter(session) {
   document.querySelector('#workspace').inert=false;
   syncStatus.textContent='Dados carregados do servidor.';
   layoutSignedIn();
+  applyVehicleQRTarget();
   if(document.querySelector('#backup'))document.querySelector('#backup').onclick=exportBackup;
   document.querySelector('#logout').onclick=async()=>{
     if(cloud.busy||companySaving) return;

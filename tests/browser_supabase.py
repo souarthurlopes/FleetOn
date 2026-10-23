@@ -215,9 +215,16 @@ try:
         expect(page.locator('.alert-item')).to_have_count(0)
         expect(page.locator('#invite-form')).to_have_count(0) and page.locator('#import').count()==0
         assert not page.locator('[data-go="add:0"]').is_visible()
-        page.locator('[data-go^="open:"]').click();page.locator('#dest').fill('Cliente');page.locator('#kmi').fill('100');page.locator('#comb').select_option('Cheio');page.locator('#inspection-confirm').check();page.locator('[data-go^="out:"]').click()
+        # Scanning selects the exact vehicle for a driver without exposing its dossier.
+        duplicate=dict(fleet['state']['cars'][0]);duplicate['id']+=100
+        fleet['state']['cars'].append(duplicate)
+        page.reload();page.locator('#user-email').wait_for()
+        page.evaluate("location.hash=new URL(FleetQRLinks.url(location.origin,cloud.context.owner_id,S.cars[0].id)).hash")
+        expect(page.locator('#sync-status')).to_contain_text('selecionado pelo QR Code');expect(page.locator('.car:visible')).to_have_count(1)
+        assert page.evaluate('S.cars[0].uso===null');expect(page.locator('#detail')).to_be_empty();expect(page.locator('[data-vehicle-qr]:visible')).to_have_count(0)
+        page.locator('.car:visible [data-go^="open:"]').click();page.locator('#dest').fill('Cliente');page.locator('#kmi').fill('100');page.locator('#comb').select_option('Cheio');page.locator('#inspection-confirm').check();page.locator('[data-go^="out:"]').click()
         page.get_by_text('Viagem registrada.',exact=True).wait_for();assert fleet['state']['cars'][0]['uso']['user_id']==user['id']
-        page.locator('[data-go^="open:"]').click();page.locator('#kmf').fill('125');page.locator('#comb').select_option('1/2');page.locator('#inspection-confirm').check();page.locator('[data-go^="in:"]').click()
+        page.locator('.car:visible [data-go^="open:"]').click();page.locator('#kmf').fill('125');page.locator('#comb').select_option('1/2');page.locator('#inspection-confirm').check();page.locator('[data-go^="in:"]').click()
         page.wait_for_function("document.querySelector('.meta').textContent.includes('125')")
         assert fleet['state']['cars'][0]['km']==125
         expect(page.locator('#reports')).to_be_empty();expect(page.locator('#detail')).to_be_empty();expect(page.locator('.vehicle-detail-link:visible')).to_have_count(0)
