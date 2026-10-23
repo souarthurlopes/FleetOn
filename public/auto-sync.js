@@ -8,7 +8,7 @@ function isFleetEditing(){
  return cloud.busy||cloud.dirty||cloud.blocked||hasWorkspaceDraft()||hasInspectionDraft()||open!==null||docOpen!==null||pcOpen!==null||rvOpen!==null||ed!==null||cmp!==null||driverCnhEdit!==null||
   (!!focus?.closest('#workspace')&&focus.matches('input,select,textarea'));
 }
-function isFleetViewControl(element){return ['vehicle-search','vehicle-status','vehicle-driver','alert-category','alert-severity'].includes(element.id);}
+function isFleetViewControl(element){return ['vehicle-search','vehicle-status','vehicle-driver','alert-category','alert-severity','report-from','report-to','report-vehicle','report-driver','report-kind'].includes(element.id);}
 function syncIndicator(message,state='live'){
  const node=document.querySelector('#auto-sync-status');node.hidden=false;node.textContent=message;node.dataset.state=state;
 }

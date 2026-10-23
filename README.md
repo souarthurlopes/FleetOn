@@ -320,3 +320,38 @@ endpoint de viagem com hodômetro. O endpoint anterior é revogado para evitar
 clientes antigos que ignoravam o km inicial. A interface identifica quando essa
 atualização está faltando, sem confirmar uma retirada com distância incorreta.
 Para gestor, o fluxo completo da frota também registra esses valores.
+
+## Página do veículo e relatórios
+
+Na conta do gestor, abra **Veículos → Ver detalhes**. A ficha reúne visão geral,
+quem está com o veículo, retiradas/devoluções com hodômetro, fotos dos registros,
+manutenções, peças, vencimentos dos documentos e custos. Os botões de edição
+levam aos formulários existentes. A área Documentos mostra IPVA, licenciamento,
+seguro e revisão por data cadastrados; esta atualização não adiciona upload de
+arquivos de documentos. Fotos são as já registradas nas viagens/abastecimentos.
+O histórico usa a placa; cadastros com placa duplicada exibem um aviso.
+
+Em **Relatórios**, combine período, veículo, motorista e tipo de registro. O
+padrão é o mês atual; **Todo período** remove o limite de datas sem apagar os
+outros filtros. **Limpar filtros** mostra tudo. A consulta inclui veículos que
+aparecem apenas no histórico. Datas usam o horário de Brasília. Registros sem
+data válida aparecem somente nas consultas sem limite de datas.
+
+Os indicadores somam gastos registrados (incluindo multas pagas e pendentes),
+km nas devoluções, viagens concluídas e litros. Gastos são atribuídos a um
+motorista somente com identificação explícita ou durante uma viagem identificada
+sem ambiguidade. Fora desse intervalo, aparecem como **Não identificado**; o
+filtro de motorista não inclui esses gastos. Registros antigos podem não conter
+hodômetro ou fotos. Um nome histórico sem conta pode aparecer como registro
+separado de uma conta identificada.
+
+**Exportar CSV / Excel** baixa todos os resultados filtrados, independentemente
+da página exibida, em UTF-8 com BOM, separador ponto e vírgula e decimais com
+vírgula. Textos que podem ser interpretados como fórmulas são protegidos.
+**Imprimir / PDF** abre a impressão do navegador com todos os resultados; escolha
+Salvar como PDF para baixar. A tela usa páginas de 50 registros. Relatórios e
+custos permanecem restritos ao gestor, pelas permissões existentes.
+
+Não há nova migração SQL para estas telas. Validação: `npm test` e
+`python3 tests/browser_reports.py` (conta e banco locais descartáveis; filtros,
+custos, fotos, CSV/PDF completos, navegação, persistência e celular).

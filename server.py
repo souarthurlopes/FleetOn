@@ -129,7 +129,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', str(len(raw)))
             self.end_headers()
             return self.wfile.write(raw)
-        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css', '/layout.js':'layout.js', '/layout.css':'layout.css', '/fleet-insights.js':'fleet-insights.js', '/fleet-tools.js':'fleet-tools.js', '/fleet-tools.css':'fleet-tools.css', '/inspection.js':'inspection.js', '/inspection-core.js':'inspection-core.js', '/inspection.css':'inspection.css', '/auto-sync.js':'auto-sync.js'}
+        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css', '/layout.js':'layout.js', '/layout.css':'layout.css', '/fleet-insights.js':'fleet-insights.js', '/fleet-tools.js':'fleet-tools.js', '/fleet-tools.css':'fleet-tools.css', '/inspection.js':'inspection.js', '/inspection-core.js':'inspection-core.js', '/inspection.css':'inspection.css', '/auto-sync.js':'auto-sync.js', '/reports-core.js':'reports-core.js', '/vehicle-reports.js':'vehicle-reports.js', '/vehicle-reports.css':'vehicle-reports.css'}
         if path not in files:
             return self.reply(404, {'error': 'Não encontrado.'})
         target = ROOT / 'public' / files[path]

@@ -6,6 +6,8 @@ const pageInfo={
  fin:['Multas','Organize as infrações e os pagamentos.'],
  hist:['Histórico','Cada movimento da sua frota, registrado.'],
  alerts:['Central de alertas','Cuide dos vencimentos antes que virem imprevistos.'],
+ reports:['Relatórios','Consulte, filtre e exporte os registros da sua frota.'],
+ detail:['Detalhes do veículo','Viagens, fotos, documentos e custos em um só lugar.'],
  profile:['Meu perfil','Sua conta, sua equipe e suas preferências.']
 };
 let currentPage='dash', sidebarReturnFocus=null;
@@ -41,8 +43,8 @@ function navigateLayout(page) {
  document.querySelector('#workspace').hidden=profile;
  document.querySelector('#profile-navigation').setAttribute('aria-current',profile?'page':'false');
  document.querySelector('#driver-navigation').setAttribute('aria-current',page==='car'?'page':'false');
- navigation.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(!profile&&b.dataset.t===page)));
- if(!profile) ['dash','car','drv','log','fin','hist','alerts'].forEach(id=>document.querySelector('#'+id).hidden=id!==page);
+ navigation.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(!profile&&b.dataset.t===(page==='detail'?'car':page))));
+ if(!profile) ['dash','car','drv','log','fin','hist','alerts','reports','detail'].forEach(id=>document.querySelector('#'+id).hidden=id!==page);
  updatePageHeading();setSidebar(false);
 }
 function layoutAccount() {

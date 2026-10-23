@@ -178,6 +178,7 @@ try:
         page.locator('[data-go^="open:"]').click();page.locator('#kmf').fill('125');page.locator('#comb').select_option('1/2');page.locator('#inspection-confirm').check();page.locator('[data-go^="in:"]').click()
         page.wait_for_function("document.querySelector('.meta').textContent.includes('125')")
         assert fleet['state']['cars'][0]['km']==125
+        expect(page.locator('#reports')).to_be_empty();expect(page.locator('#detail')).to_be_empty();expect(page.locator('.vehicle-detail-link:visible')).to_have_count(0)
         assert any('/fleeton_driver_odometer' in call for call in calls)
         page.locator('#logout').click();page.locator('#email').wait_for();assert not page.locator('#workspace').is_visible()
         assert any('/recover' in x for x in calls)
