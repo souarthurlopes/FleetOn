@@ -426,3 +426,23 @@ continua com frotas isoladas por conta. Validação: `npm test` cobre a migraç�
 permissões em PostgreSQL e `python3 tests/browser_supabase.py` verifica escolha
 de cargo, convite e entrada automática de gestor/motorista com o SDK real e APIs
 simuladas. Não são criadas contas no Supabase real pelos testes.
+
+## Interface simplificada
+
+O **Painel** começa com quatro números: veículos, disponíveis, em uso e
+pendências (vencimentos da frota/equipe mais multas não pagas). Mostra até cinco
+veículos em uso, com acesso à ficha, e um resumo das pendências. Quando houver
+mais veículos em uso, o botão abre Veículos com o filtro Em uso aplicado. Os
+atalhos levam aos relatórios, alertas ou multas conforme a necessidade.
+
+Gráficos, indicadores financeiros, consumo e ranking continuam disponíveis em
+**Análises financeiras e de consumo**, fechado por padrão. A expansão é mantida
+nas atualizações da mesma sessão e reiniciada ao sair. Para imprimir essas
+análises, abra a seção antes de usar seu botão Imprimir / PDF.
+
+Os cartões de veículos mostram placa, situação, modelo, hodômetro e motorista/
+destino atual. Pendências aparecem resumidas; valores, vencimentos e manutenção
+ficam na ficha **Ver detalhes**. Revisão, peças, documentos e remoção continuam
+em **Mais ações**, acessível também por teclado. Retirar/devolver ficam visíveis.
+A prévia **Visão do motorista** fica no rodapé do menu lateral. Não há nova
+migração SQL nem alteração dos dados/permissões por essa organização visual.

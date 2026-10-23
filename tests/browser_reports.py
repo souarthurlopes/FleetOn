@@ -25,7 +25,25 @@ with tempfile.TemporaryDirectory() as tmp:
                ...Array.from({length:55},(_,i)=>({tipo:'Outro',placa:'BBB5678',t:t+i,valor:1,det:i===0?'=FORMULA()':'Custo '+i}))]};
               const data=await api('fleet',{version:cloud.version,state});cloud.version=data.version;resetView(state);cloud.lastState=JSON.stringify(stateOnly());
             }''')
-            page.locator('[data-t="car"]').click();page.locator('[data-open-vehicle="1"]').click()
+            expect(page.locator('.fleet-overview .kpi')).to_have_count(4)
+            page.screenshot(path='/tmp/fleeton-simplified-dashboard.png',full_page=True,animations='disabled')
+            expect(page.locator('#dash')).to_contain_text('Bia → Cliente')
+            page.locator('[data-overview-page="fin"]').click();expect(page.locator('#fin')).to_be_visible();page.locator('[data-t="dash"]').click()
+            expect(page.locator('#dashboard-analytics')).not_to_be_visible()
+            original_state=page.evaluate('stateOnly()');original_version=page.evaluate('cloud.version')
+            page.locator('#dashboard-analysis-disclosure > summary').click();expect(page.get_by_role('heading',name='Gasto por mês',exact=True)).to_be_visible()
+            page.locator('[data-go="per:tri"]').click();expect(page.get_by_role('heading',name='Gasto por mês',exact=True)).to_be_visible()
+            page.locator('#dashboard-analysis-disclosure > summary').click()
+            page.evaluate('''()=>{const copy=structuredClone(stateOnly());for(let i=3;i<9;i++)copy.cars.push({id:i,placa:'EXTRA'+i,modelo:'Carro',km:500,prox:10000,uso:{mot:'Bia',dest:'Cliente',quando:'Hoje',kmIni:500},pecas:[]});resetView(copy)}''')
+            expect(page.locator('.overview-item')).to_have_count(5);page.locator('[data-overview-inuse]').click();expect(page.locator('#vehicle-status')).to_have_value('inuse');expect(page.locator('.car:visible')).to_have_count(7)
+            page.evaluate('(state)=>resetView(state)',original_state);assert page.evaluate('cloud.version')==original_version
+            page.locator('[data-t="dash"]').click();page.locator('[data-overview-page="reports"]').click();expect(page.locator('#reports')).to_be_visible()
+            page.locator('[data-t="car"]').click();page.locator('#clear-vehicle-filters').click();expect(page.locator('[data-go="docs:1"]')).not_to_be_visible()
+            page.locator('.car[data-car-id="1"] .vehicle-options summary').focus();page.keyboard.press('Enter');expect(page.locator('[data-go="docs:1"]')).to_be_visible()
+            page.locator('[data-go="docs:1"]').click();expect(page.locator('#d1')).to_be_visible();page.locator('[data-go="cancel:0"]').click();page.wait_for_function('!cloud.busy')
+            page.screenshot(path='/tmp/fleeton-simplified-vehicles.png',full_page=True,animations='disabled')
+            page.locator('#car [data-open-vehicle="1"]').click()
+
             expect(page.locator('#detail')).to_be_visible();expect(page.locator('#detail')).to_contain_text('R$ 350,00')
             page.locator('[data-detail-tab="trips"]').click();expect(page.locator('#detail-content tbody tr')).to_have_count(2)
             page.locator('[data-detail-tab="photos"]').click();expect(page.locator('#detail-content img')).to_have_count(1)
@@ -53,7 +71,7 @@ with tempfile.TemporaryDirectory() as tmp:
             page.evaluate('resetView(stateOnly())');expect(page.locator('#reports')).to_be_visible();expect(page.locator('#report-vehicle')).to_have_value('AAA1234');expect(page.locator('#report-count')).to_contain_text('5 registros')
             page.screenshot(path='/tmp/fleeton-reports.png',full_page=True)
             page.set_viewport_size({'width':390,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth');page.screenshot(path='/tmp/fleeton-reports-mobile.png',full_page=True,animations='disabled')
-            page.locator('#menu-toggle').click();page.locator('[data-t="car"]').click();page.locator('[data-open-vehicle="2"]').click();expect(page.locator('#detail-content')).to_contain_text('Bia');assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+            page.locator('#menu-toggle').click();page.locator('[data-t="car"]').click();page.locator('#car [data-open-vehicle="2"]').click();expect(page.locator('#detail-content')).to_contain_text('Bia');assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             page.locator('[data-detail-tab="overview"]').focus();page.keyboard.press('End');expect(page.locator('[data-detail-tab="costs"]')).to_be_focused()
             page.locator('[data-detail-tab="maintenance"]').click();page.locator('[data-detail-edit="maintenance"]').click();expect(page.locator('#lc')).to_have_value('2');expect(page.locator('#lt')).to_have_value('Revisão');expect(page.locator('#lk')).to_have_value('500')
             page.evaluate('openVehicleDetail(2)');page.locator('[data-detail-tab="documents"]').click();page.locator('[data-detail-edit="documents"]').click();expect(page.locator('#car')).to_be_visible();assert page.evaluate('docOpen')==2

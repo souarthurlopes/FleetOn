@@ -14,6 +14,7 @@ const pageInfo={
 let currentPage='dash', sidebarReturnFocus=null;
 const mobileSidebar=matchMedia('(max-width:850px)');
 const sidebar=document.querySelector('#app-sidebar');
+document.querySelector('.sidebar-bottom').prepend(document.querySelector('#role'));
 const originalBrand=document.querySelector('#workspace h1');
 document.querySelector('#sidebar-brand').append(originalBrand);
 const authBrand=document.createElement('div');authBrand.className='auth-brand';authBrand.append(originalBrand.cloneNode(true));document.querySelector('main').prepend(authBrand);

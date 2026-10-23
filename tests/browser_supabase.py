@@ -142,6 +142,7 @@ try:
         page.locator('#clear-vehicle-filters').click();page.locator('#vehicle-status').select_option('attention');expect(page.locator('.car:visible')).to_have_count(2)
         page.locator('#clear-vehicle-filters').click()
         first_id=original_car['id']
+        page.locator(f'.car[data-car-id="{first_id}"] .vehicle-options summary').click()
         page.locator(f'[data-go="docs:{first_id}"]').click();page.locator('#d1').fill(dates['future'])
         page.locator('#vehicle-search').fill('cloud123')
         assert page.locator('#d1').input_value()==dates['future']

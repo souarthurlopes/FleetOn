@@ -39,6 +39,7 @@ async function saveCloud() {
 function authScreen() {
   stopFleetSync();
   resetFleetTools();
+  dashboardAnalyticsOpen=false;
   resetVehicleReports();
   companyState=null;companyError='';companyDraft=false;companySaving=false;displayCompany();
   layoutSignedOut();
