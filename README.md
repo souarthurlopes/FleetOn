@@ -469,8 +469,12 @@ CSV, persistência e celular em banco descartável.
 ## QR Code de cada veículo
 
 Na conta de gestor, abra **Veículos → Ver detalhes → QR Code**, ou **Mais ações
-→ QR Code** no cartão. A etiqueta contém QR, empresa (quando cadastrada), placa,
-modelo e orientação de acesso. É possível **Baixar PNG**, **Imprimir etiqueta**
+→ QR Code** no cartão. A etiqueta contém QR, logo e nome da empresa (quando cadastrados), placa,
+modelo e orientação de acesso. A logo é obtida de **Minha empresa** e aparece
+acima do QR, mantendo as proporções e a margem branca do código. PNG e impressão
+utilizam a mesma etiqueta com logo. Sem logo, o nome da empresa permanece; se uma
+imagem salva estiver inválida, a etiqueta funciona sem ela e mostra um aviso
+para atualizar o cadastro. Não é preciso novo SQL. É possível **Baixar PNG**, **Imprimir etiqueta**
 (padrão de 85 mm de largura; use papel/escala da impressora) e **Copiar link**.
 Imprima em boa qualidade, sem recortar a margem branca do código. A impressão
 mostra apenas a etiqueta. PNG e geração do código acontecem no próprio navegador,

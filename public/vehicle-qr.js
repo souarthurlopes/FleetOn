@@ -5,7 +5,16 @@ function qrCanvasText(ctx,text,y,size){ctx.font=`600 ${size}px sans-serif`;while
 async function vehicleQRLabel(link,car,company){
  const raw=await FleetOnQRCode.toDataURL(link,{width:552,margin:4,errorCorrectionLevel:'M',color:{dark:'#000000',light:'#ffffff'}});
  const image=new Image();image.src=raw;await image.decode();
- const canvas=document.createElement('canvas');canvas.width=680;canvas.height=860;const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,680,860);ctx.fillStyle='#0f172a';ctx.textAlign='center';qrCanvasText(ctx,company||'FleetOn',55,26);ctx.drawImage(image,64,96,552,552);qrCanvasText(ctx,String(car.placa),710,42);qrCanvasText(ctx,String(car.modelo||''),752,23);qrCanvasText(ctx,'Escaneie para acessar no FleetOn',802,20);return canvas.toDataURL('image/png');
+ let logo=null;
+ if(company?.logo&&company.logo.length<=65536&&/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(company.logo)){
+  try{const candidate=new Image();candidate.src=company.logo;await candidate.decode();if(candidate.naturalWidth&&candidate.naturalHeight)logo=candidate;}catch{}
+ }
+ const canvas=document.createElement('canvas');canvas.width=680;canvas.height=logo?1000:860;
+ const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0f172a';ctx.textAlign='center';
+ const offset=logo?140:0;
+ if(logo){const scale=Math.min(400/logo.naturalWidth,112/logo.naturalHeight),width=logo.naturalWidth*scale,height=logo.naturalHeight*scale;ctx.drawImage(logo,(680-width)/2,28+(112-height)/2,width,height);}
+ qrCanvasText(ctx,company?.name||'FleetOn',55+offset,26);ctx.drawImage(image,64,96+offset,552,552);qrCanvasText(ctx,String(car.placa),710+offset,42);qrCanvasText(ctx,String(car.modelo||''),752+offset,23);qrCanvasText(ctx,'Escaneie para acessar no FleetOn',802+offset,20);
+ return {png:canvas.toDataURL('image/png'),hasLogo:!!logo};
 }
 async function openVehicleQR(id){
  if(cloud.context?.role!=='manager')return;
@@ -15,9 +24,9 @@ async function openVehicleQR(id){
  dialog.innerHTML=`<div class="row"><h2 id="vehicle-qr-title">QR Code · ${esc(car.placa)}</h2><button type="button" class="btn sec" id="close-vehicle-qr" aria-label="Fechar QR Code">Fechar</button></div><p class="settings-help">Imprima e coloque no veículo. O acesso exige login na empresa.</p><img id="vehicle-qr-image" alt="Etiqueta com QR Code do veículo ${esc(car.placa)}" hidden><label>Link do veículo<input id="vehicle-qr-link" readonly></label><div class="report-actions"><button type="button" class="btn" id="download-vehicle-qr" disabled>Baixar PNG</button><button type="button" class="btn sec" id="print-vehicle-qr" disabled>Imprimir etiqueta</button><button type="button" class="btn sec" id="copy-vehicle-qr" disabled>Copiar link</button></div><p id="vehicle-qr-status" role="status">Gerando QR Code…</p>`;
  document.body.append(dialog);dialog.addEventListener('close',()=>{vehicleQRGeneration++;clearVehicleQRPrint();dialog.remove();});dialog.querySelector('#close-vehicle-qr').onclick=()=>dialog.close();dialog.showModal();
  try{
-  const link=FleetQRLinks.url(location.origin,cloud.context.owner_id??cloud.context.user_id,car.id),company=companyState?.name||'',png=await vehicleQRLabel(link,car,company);
+  const link=FleetQRLinks.url(location.origin,cloud.context.owner_id??cloud.context.user_id,car.id),company={name:companyState?.name||'',logo:companyState?.logo||''},{png,hasLogo}=await vehicleQRLabel(link,car,company);
   if(generation!==vehicleQRGeneration||!dialog.isConnected)return;
-  const image=dialog.querySelector('#vehicle-qr-image');image.src=png;image.hidden=false;dialog.querySelector('#vehicle-qr-link').value=link;dialog.querySelector('#vehicle-qr-status').textContent='Pronto para baixar ou imprimir.';
+  const image=dialog.querySelector('#vehicle-qr-image');image.src=png;image.hidden=false;dialog.querySelector('#vehicle-qr-link').value=link;dialog.querySelector('#vehicle-qr-status').textContent=hasLogo?'Pronto para baixar ou imprimir com a logo da empresa.':company.logo?'Pronto sem logo: a imagem cadastrada não pôde ser carregada. Atualize a logo em Minha empresa.':'Pronto para baixar ou imprimir. Para incluir sua logo, cadastre-a em Minha empresa.';
   for(const button of dialog.querySelectorAll('.report-actions button'))button.disabled=false;
   dialog.querySelector('#download-vehicle-qr').onclick=()=>{const a=document.createElement('a');a.href=png;a.download='fleeton-'+String(car.placa).replace(/[^a-zA-Z0-9_-]/g,'_')+'-qr.png';a.click();};
   dialog.querySelector('#copy-vehicle-qr').onclick=async()=>{try{await navigator.clipboard.writeText(link);dialog.querySelector('#vehicle-qr-status').textContent='Link copiado.';}catch{dialog.querySelector('#vehicle-qr-link').select();dialog.querySelector('#vehicle-qr-status').textContent='Selecione e copie o link acima.';}};
