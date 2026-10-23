@@ -80,9 +80,10 @@
   return '"'+text.replaceAll('"','""')+'"';
  }
  function timeLabel(row){return Number.isFinite(row.time)?new Date(row.time).toLocaleString('pt-BR',{timeZone:TZ,dateStyle:'short',timeStyle:'short'}):row.day?row.day.split('-').reverse().join('/'):'Sem data válida';}
- function csv(rows){
+ function csv(rows,company){
   const header=['Data/hora (Brasília)','Placa','Modelo','Evento','Motorista','Km retirada','Km devolução','Km percorridos','Litros','Valor (R$)','Pagamento','Descrição'];
   const data=rows.map(r=>[timeLabel(r),r.plate,r.model,r.type,r.driver,r.kmStart,r.kmEnd,r.distance,r.liters,r.amount,r.payment,r.description]);
+  if(company){header.push('Empresa','CNPJ da empresa');for(const row of data)row.push(company.name,company.cnpj);}
   return '\ufeff'+[header,...data].map(line=>line.map(csvCell).join(';')).join('\r\n');
  }
  root.FleetReports={rows,filter,summary,csv,timeLabel,category,fineTime,dayOf};

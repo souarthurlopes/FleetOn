@@ -365,3 +365,29 @@ outra migração SQL. O botão Convidar motorista registra o convite no aplicati
 ele não envia e-mail. O convidado deve cadastrar-se com o endereço convidado e
 confirmá-lo. Contas com outra frota/dados continuam protegidas pelas validações
 existentes; se o vínculo falhar, o login informa o erro sem abrir a área do gestor.
+
+## Minha empresa
+
+Execute **supabase/006_company.sql** no SQL Editor do Supabase após as migrações
+anteriores. O script cria um cadastro separado para cada dono de frota, com RLS e
+acesso apenas pelas funções autenticadas. Pode ser reaplicado e não remove dados.
+Sem essa atualização, o restante do aplicativo continua funcionando; a aba informa
+o arquivo necessário e fica bloqueada até clicar em **Atualizar dados** após o SQL.
+
+Em **Minha empresa**, cada gestor cadastra nome, logo e, opcionalmente, CNPJ,
+telefone e endereço. CNPJ aceita 14 dígitos, com ou sem pontuação (verificação de
+formato). A logo aceita imagem de até 5 MB e é ajustada mantendo as proporções,
+convertida em JPEG de até 64 KB. A identificação aparece no cabeçalho para a equipe;
+PDF inclui nome, logo e contatos, e CSV inclui colunas de empresa e CNPJ.
+Motoristas consultam a empresa da própria frota, sem acesso ao formulário ou à
+função de gravação. Eles não podem escolher outra empresa por identificador.
+
+O cadastro fica separado do backup JSON de veículos. Em outros dispositivos,
+clique em **Atualizar dados** ou entre novamente para carregar alterações da
+empresa. Rascunhos da empresa pausam a substituição automática da frota; o envio
+de um formulário de frota não apaga esse rascunho. Edições simultâneas da empresa
+usam o último cadastro salvo. A API local possui cadastro equivalente por conta.
+
+Validação: `npm test`, `python3 tests/browser_company.py` e regressões de
+relatórios, permissões Supabase e sincronização. Os testes utilizam bancos
+locais descartáveis e APIs simuladas, sem cadastrar empresas no projeto real.

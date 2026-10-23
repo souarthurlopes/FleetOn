@@ -2,13 +2,13 @@
 let fleetSyncTimer=null,fleetSyncGeneration=0,fleetSyncPending=false,fleetSyncRunning=false;
 let fleetSyncFailures=0,fleetSyncLastCheck=0,fleetSyncSetupRequired=false,fleetEditEpoch=0,fleetDraftEdited=false;
 const FLEET_SYNC_INTERVAL=20000;
-function hasWorkspaceDraft(){return fleetDraftEdited;}
+function hasWorkspaceDraft(){return fleetDraftEdited||companyDraft;}
 function isFleetEditing(){
  const focus=document.activeElement;
- return cloud.busy||cloud.dirty||cloud.blocked||hasWorkspaceDraft()||hasInspectionDraft()||open!==null||docOpen!==null||pcOpen!==null||rvOpen!==null||ed!==null||cmp!==null||driverCnhEdit!==null||
+ return companySaving||cloud.busy||cloud.dirty||cloud.blocked||hasWorkspaceDraft()||hasInspectionDraft()||open!==null||docOpen!==null||pcOpen!==null||rvOpen!==null||ed!==null||cmp!==null||driverCnhEdit!==null||
   (!!focus?.closest('#workspace')&&focus.matches('input,select,textarea'));
 }
-function isFleetViewControl(element){return ['vehicle-search','vehicle-status','vehicle-driver','alert-category','alert-severity','report-from','report-to','report-vehicle','report-driver','report-kind'].includes(element.id);}
+function isFleetViewControl(element){return !!element.closest('#company-form')||['vehicle-search','vehicle-status','vehicle-driver','alert-category','alert-severity','report-from','report-to','report-vehicle','report-driver','report-kind'].includes(element.id);}
 function syncIndicator(message,state='live'){
  const node=document.querySelector('#auto-sync-status');node.hidden=false;node.textContent=message;node.dataset.state=state;
 }

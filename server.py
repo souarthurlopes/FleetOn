@@ -40,6 +40,8 @@ def initialize():
           version INTEGER NOT NULL DEFAULT 0, body TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS profiles (
           user_id INTEGER PRIMARY KEY REFERENCES users(id), name TEXT NOT NULL DEFAULT '', avatar TEXT NOT NULL DEFAULT '');
+        CREATE TABLE IF NOT EXISTS companies (
+          user_id INTEGER PRIMARY KEY REFERENCES users(id), body TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS attempts (
           identity TEXT PRIMARY KEY, count INTEGER NOT NULL, expires INTEGER NOT NULL);
         ''')
@@ -115,6 +117,9 @@ class Handler(BaseHTTPRequestHandler):
                 if path == '/api/fleetStatus':
                     row=c.execute('SELECT version FROM fleets WHERE user_id=?',(s[1],)).fetchone()
                     return self.reply(200, {'role':'manager','owner_id':s[1],'version':row[0] if row else 0})
+                if path == '/api/company':
+                    row=c.execute('SELECT body FROM companies WHERE user_id=?',(s[1],)).fetchone()
+                    return self.reply(200,json.loads(row[0]) if row else None)
                 if path == '/api/context':
                     row = c.execute('SELECT name,avatar FROM profiles WHERE user_id=?', (s[1],)).fetchone()
                     return self.reply(200, {'role':'manager', 'user_id':s[1], 'profile':{'name':row[0] if row else '', 'avatar':row[1] if row else ''}})
@@ -129,7 +134,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', str(len(raw)))
             self.end_headers()
             return self.wfile.write(raw)
-        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css', '/layout.js':'layout.js', '/layout.css':'layout.css', '/fleet-insights.js':'fleet-insights.js', '/fleet-tools.js':'fleet-tools.js', '/fleet-tools.css':'fleet-tools.css', '/inspection.js':'inspection.js', '/inspection-core.js':'inspection-core.js', '/inspection.css':'inspection.css', '/auto-sync.js':'auto-sync.js', '/reports-core.js':'reports-core.js', '/vehicle-reports.js':'vehicle-reports.js', '/vehicle-reports.css':'vehicle-reports.css'}
+        files = {'/': 'index.html', '/cloud.js': 'cloud.js', '/supabase-adapter.js': 'supabase-adapter.js', '/vendor/supabase.js': 'vendor/supabase.js', '/account.js':'account.js', '/account.css':'account.css', '/layout.js':'layout.js', '/layout.css':'layout.css', '/fleet-insights.js':'fleet-insights.js', '/fleet-tools.js':'fleet-tools.js', '/fleet-tools.css':'fleet-tools.css', '/inspection.js':'inspection.js', '/inspection-core.js':'inspection-core.js', '/inspection.css':'inspection.css', '/auto-sync.js':'auto-sync.js', '/company.js':'company.js','/company.css':'company.css','/reports-core.js':'reports-core.js', '/vehicle-reports.js':'vehicle-reports.js', '/vehicle-reports.css':'vehicle-reports.css'}
         if path not in files:
             return self.reply(404, {'error': 'Não encontrado.'})
         target = ROOT / 'public' / files[path]
@@ -208,6 +213,17 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(401, {'error': 'Sessão expirada. Entre novamente.'})
             if not hmac.compare_digest(self.headers.get('X-CSRF-Token', ''), s[2]):
                 return self.reply(403, {'error': 'Sessão inválida. Recarregue a página.'})
+            if path == '/api/company':
+                import re
+                limits={'name':120,'cnpj':18,'phone':30,'address':300,'logo':65536}
+                if not all(isinstance(body.get(k),str) and len(body[k])<=n for k,n in limits.items()):
+                    raise ValueError()
+                data={k:body[k].strip() for k in limits}
+                if not data['name'] or (data['cnpj'] and not re.fullmatch(r'(?:[0-9]{14}|[0-9]{2}\.[0-9]{3}\.[0-9]{3}/[0-9]{4}-[0-9]{2})',data['cnpj'])) or (data['logo'] and not re.fullmatch(r'data:image/jpeg;base64,[A-Za-z0-9+/=]+',data['logo'])):
+                    raise ValueError()
+                c.execute('INSERT INTO companies VALUES (?,?) ON CONFLICT(user_id) DO UPDATE SET body=excluded.body',(s[1],json.dumps(data)))
+                c.commit()
+                return self.reply(200,data)
             if path == '/api/profile':
                 name,avatar=body.get('name'),body.get('avatar')
                 import re

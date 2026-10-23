@@ -34,5 +34,6 @@ test('Custos são atribuídos somente dentro de uma viagem identificada e filtro
 test('CSV exporta todos os registros, escapa texto e bloqueia fórmulas de planilha',()=>{
  const csv=R.csv(R.rows(fixture()));assert.ok(csv.startsWith('\ufeff'));assert.ok(csv.includes('375')===false);
  assert.ok(csv.includes('"\'=HYPERLINK(""bad"")\nOutro"'));assert.ok(csv.includes('100,1'));
+ assert.ok(R.csv(R.rows(fixture()),{name:'=EMPRESA',cnpj:'12345678000190'}).includes("\"'=EMPRESA\""));
  const rows=Array.from({length:101},()=>R.rows(fixture())[0]);assert.equal(R.csv(rows).split('\r\n').length,102);
 });

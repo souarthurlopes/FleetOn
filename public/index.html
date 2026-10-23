@@ -109,6 +109,7 @@ body.mot .tabs,body.mot .gonly{display:none!important}
 <link rel="stylesheet" href="/fleet-tools.css">
 <link rel="stylesheet" href="/inspection.css">
 <link rel="stylesheet" href="/vehicle-reports.css">
+<link rel="stylesheet" href="/company.css">
 </head>
 <body>
 <aside class="app-sidebar" id="app-sidebar" aria-label="Menu principal" hidden>
@@ -137,8 +138,9 @@ body.mot .tabs,body.mot .gonly{display:none!important}
   <button class="tab" role="tab" data-t="hist" aria-selected="false">Histórico</button>
   <button class="tab" role="tab" data-t="alerts" aria-selected="false">Alertas</button>
   <button class="tab" role="tab" data-t="reports" aria-selected="false">Relatórios</button>
+  <button class="tab" role="tab" data-t="company" aria-selected="false">Minha empresa</button>
 </div>
-<section id="dash"></section><section id="car" hidden></section><section id="drv" hidden></section><section id="log" hidden></section><section id="fin" hidden></section><section id="hist" hidden></section><section id="alerts" hidden></section><section id="reports" hidden></section><section id="detail" hidden></section>
+<section id="dash"></section><section id="car" hidden></section><section id="drv" hidden></section><section id="log" hidden></section><section id="fin" hidden></section><section id="hist" hidden></section><section id="alerts" hidden></section><section id="reports" hidden></section><section id="detail" hidden></section><section id="company" hidden></section>
 </div></main>
 <script>
 const KEY='frota-v1';
@@ -162,7 +164,7 @@ function pcForm(c){const p=c.pecas||[];return `<div style="margin-top:8px">${PN.
 function drvAt(p,t){let c=null,u=null;S.log.filter(l=>l.placa===p&&(l.tipo==='Saída'||l.tipo==='Devolução')).sort((a,b)=>a.t-b.t).forEach(l=>{if(l.t>t)return;if(l.tipo==='Saída')c=l.det.split(' → ')[0];else{u={n:l.det.split(' rodou ')[0],t:l.t};c=null}});return c||(u&&t-u.t<432e5?u.n:null)}
 function cmpView(){return inspectionComparison();}
 
-function rolebar(){const driver=cloud.context?.role==='driver';if(driver)S.role='mot';document.body.classList.toggle('mot',S.role==='mot');$('#role').innerHTML=driver?'':S.role==='mot'?`<button class="btn sm sec" data-go="gest:0">Voltar à visão do gestor</button>`:`<button class="btn sm sec" data-go="modo:0">Visão do motorista</button>`;if(S.role==='mot'){['dash','drv','log','fin','hist','alerts','reports','detail'].forEach(i=>$('#'+i).hidden=true);$('#car').hidden=false}}
+function rolebar(){const driver=cloud.context?.role==='driver';if(driver)S.role='mot';document.body.classList.toggle('mot',S.role==='mot');$('#role').innerHTML=driver?'':S.role==='mot'?`<button class="btn sm sec" data-go="gest:0">Voltar à visão do gestor</button>`:`<button class="btn sm sec" data-go="modo:0">Visão do motorista</button>`;if(S.role==='mot'){['dash','drv','log','fin','hist','alerts','reports','detail','company'].forEach(i=>$('#'+i).hidden=true);$('#car').hidden=false}}
 
 const alertas=c=>[...FleetInsights.vehicleAlerts(c).map(a=>a.title),anom(c)].filter(Boolean);
 const save=()=>saveCloud();
@@ -239,11 +241,11 @@ function fin(){
   const rows=S.fines.slice().sort((a,b)=>b.data.localeCompare(a.data)).map(f=>`<tr><td>${new Date(f.data).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(f.placa)}</td><td>${esc(quem(f))}</td><td>${esc(f.desc)}</td><td>R$ ${fmt(f.valor)}</td><td><button class="btn sm ${f.pago?'sec':''}" data-go="payf:${f.id}">${f.pago?'Paga':'Pendente'}</button></td><td><button class="btn sm ico" data-go="delf:${f.id}" aria-label="Excluir multa">${pending('delf'+f.id)?'Confirmar?':ic('trash')}</button></td></tr>`).join('');
   $('#fin').innerHTML=`<div class="panel"><div class="form"><label>Veículo<select id="fc">${S.cars.map(c=>`<option value="${c.id}">${esc(c.placa)} · ${esc(c.modelo)}</option>`).join('')}</select></label><label>Data e hora da infração<input id="fd" type="datetime-local"></label><label>Valor (R$)<input id="fv" type="number" step="0.01" inputmode="decimal"></label><label>Descrição<input id="fo"></label><button class="btn" data-go="addf:0">${ic('plus')}Registrar multa</button></div></div>`+(rows?`<div class="panel scroll"><table><thead><tr><th>Infração</th><th>Veículo</th><th>Motorista</th><th>Descrição</th><th>Valor</th><th>Situação</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`:'<div class="empty">Nenhuma multa registrada.</div>');
 }
-function render(){fleetDraftEdited=false;rolebar();dash();cars();drv();logForm();hist();fin();renderAlertCenter();renderReports();renderVehicleDetail();$('#note').textContent=note;note=''}
+function render(){fleetDraftEdited=false;rolebar();dash();cars();drv();logForm();hist();fin();renderAlertCenter();renderReports();renderVehicleDetail();renderCompany();displayCompany();$('#note').textContent=note;note=''}
 document.addEventListener('click',async e=>{
   const t=e.target.closest('.tab');
   if(t && cloud.context?.role==='driver')return;
-  if(t){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b===t));['dash','car','drv','log','fin','hist','alerts','reports','detail'].forEach(i=>$('#'+i).hidden=i!==t.dataset.t);return}
+  if(t){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b===t));['dash','car','drv','log','fin','hist','alerts','reports','detail','company'].forEach(i=>$('#'+i).hidden=i!==t.dataset.t);return}
   const g=e.target.closest('[data-go]');if(!g)return;
   if(!cloud.csrf || cloud.busy || cloud.blocked)return;
   cloud.busy=true; $('#workspace').inert=true;
@@ -294,7 +296,7 @@ document.addEventListener('click',async e=>{
   if(a==='gest'&&S.role==='ges')$('.tab[data-t="dash"]').click();
   } finally {cloud.busy=false; $('#workspace').inert=cloud.blocked;}
 });
-const TI=['grid','car','users','fuel','flag','clock','alert','file'];
+const TI=['grid','car','users','fuel','flag','clock','alert','file','grid'];
 document.querySelectorAll('.tab').forEach((b,i)=>b.innerHTML=ic(TI[i])+'<span>'+b.textContent+'</span>');
 $('h1').innerHTML='<img src="data:image/png;base64,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" alt="" width="30" height="30" style="flex:none"><span>Fleet<b>On</b></span>';
 </script>
@@ -310,6 +312,7 @@ $('h1').innerHTML='<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAA
 <script src="/account.js"></script>
 <script src="/layout.js"></script>
 <script src="/auto-sync.js"></script>
+<script src="/company.js"></script>
 <script src="/cloud.js"></script>
 </body>
 </html>

@@ -44,7 +44,7 @@ function reportCaption(){
  return `${reportFilter.from||'Início dos registros'} a ${reportFilter.to||'Fim dos registros'} · ${vehicle} · ${driver} · ${document.querySelector('#report-kind').selectedOptions[0].textContent}`;
 }
 function prepareReportPrint(){if(currentPage!=='reports'||!canManageReports()||reportError())return;
- document.querySelector('#report-print').innerHTML=`<h1>FleetOn · Relatório da frota</h1><p>${esc(reportCaption())}</p><p>Gerado em ${new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})} · Horário de Brasília</p>${reportTable(selectedReportRows())}`;
+ document.querySelector('#report-print').innerHTML=`${companyPrintHeading()}<h1>FleetOn · Relatório da frota</h1><p>${esc(reportCaption())}</p><p>Gerado em ${new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})} · Horário de Brasília</p>${reportTable(selectedReportRows())}`;
 }
 const detailTabs={overview:'Visão geral',trips:'Viagens',photos:'Fotos',maintenance:'Manutenção',documents:'Documentos',costs:'Custos'};
 function renderVehicleDetail(){
@@ -84,7 +84,7 @@ document.addEventListener('click',e=>{
  if(target.id==='clear-report-filters'){reportFilter={from:'',to:'',vehicle:'',driver:'',kind:'all'};reportPage=1;renderReports();}
  if(target.id==='report-previous'){reportPage--;renderReportResults();}if(target.id==='report-next'){reportPage++;renderReportResults();}
  if(target.id==='export-report'&&!reportError()){
-  const url=URL.createObjectURL(new Blob([FleetReports.csv(selectedReportRows())],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='fleeton-relatorio-'+FleetInsights.today()+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const url=URL.createObjectURL(new Blob([FleetReports.csv(selectedReportRows(),companyState)],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='fleeton-relatorio-'+FleetInsights.today()+'.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
  }
  if(target.id==='print-report'&&!reportError()){prepareReportPrint();window.print();}
 });

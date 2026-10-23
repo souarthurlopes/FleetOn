@@ -40,6 +40,7 @@ function authScreen() {
   stopFleetSync();
   resetFleetTools();
   resetVehicleReports();
+  companyState=null;companyError='';companyDraft=false;companySaving=false;displayCompany();
   layoutSignedOut();
   document.querySelector('#workspace').hidden=true;
   account.innerHTML=`<div class="panel" style="max-width:440px;margin:40px auto"><h2>Acesse sua frota</h2>
@@ -83,17 +84,19 @@ async function enter(session) {
   if(window.FleetOnRemote?.enabled && cloud.context.invitation && cloud.context.role!=='driver') {
     cloud.context=await api('acceptInvite',{});
   }
+  await loadCompany();
   const data=await api('fleet');
   cloud.version=data.version; cloud.blocked=false; cloud.dirty=false;
   resetView(data.state); cloud.lastState=JSON.stringify(stateOnly());
   paintAccount(session,cloud.context);
+  displayCompany();
   document.querySelector('#workspace').hidden=false;
   document.querySelector('#workspace').inert=false;
   syncStatus.textContent='Dados carregados do servidor.';
   layoutSignedIn();
   if(document.querySelector('#backup'))document.querySelector('#backup').onclick=exportBackup;
   document.querySelector('#logout').onclick=async()=>{
-    if(cloud.busy) return;
+    if(cloud.busy||companySaving) return;
     if(hasWorkspaceDraft()&&!hasInspectionDraft()&&!confirm('Há um formulário em edição. Sair descarta essas informações. Deseja continuar?'))return;
     if(hasInspectionDraft()&&!confirm('O checklist em edição ainda não foi registrado. Sair descarta essas informações. Deseja continuar?'))return;
     if(cloud.dirty && !confirm('Há alterações não salvas. Exporte um backup antes de sair. Deseja sair mesmo assim?')) return;
@@ -102,7 +105,7 @@ async function enter(session) {
     catch(error){syncStatus.textContent=error.message;startFleetSync();}
   };
   document.querySelector('#refresh').onclick=async()=>{
-    if(cloud.busy) return;
+    if(cloud.busy||companySaving) return;
     if(hasWorkspaceDraft()&&!hasInspectionDraft()&&!confirm('Atualizar descarta as alterações do formulário em edição. Deseja continuar?'))return;
     if(hasInspectionDraft()&&!confirm('Atualizar descarta o checklist em edição. Deseja continuar?'))return;
     if(cloud.dirty && !confirm('Atualizar descarta as alterações não salvas. Já exportou o backup e deseja continuar?')) return;

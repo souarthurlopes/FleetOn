@@ -47,6 +47,7 @@ try:
             if path.startswith('/auth/v1/user'):return reply(user)
             if path.startswith('/auth/v1/recover') or path.startswith('/auth/v1/logout'):return reply({})
             if path.startswith('/rest/v1/rpc/fleeton_sync_status'):return reply({'role':profile_context['role'],'owner_id':profile_context['owner_id'],'version':fleet['version']})
+            if path.startswith('/rest/v1/rpc/fleeton_get_company'):return reply({'name':'Empresa da Frota','cnpj':'','phone':'','address':'','logo':''})
             if path.startswith('/rest/v1/rpc/fleeton_context'):return reply(profile_context)
             if path.startswith('/rest/v1/rpc/fleeton_accept_invite'):
                 if invite_failure['enabled']:return reply({'code':'P0001','message':'TEAM_OTHER_FLEET'},400)
@@ -167,6 +168,10 @@ try:
         assert page.evaluate('fleetSyncSetupRequired')
         context.unroute('**/rest/v1/rpc/fleeton_sync_status')
         page.locator('#refresh').click();page.locator('#user-email').wait_for()
+        context.route('**/rest/v1/rpc/fleeton_get_company',lambda route:route.fulfill(status=404,content_type='application/json',headers={'Access-Control-Allow-Origin':'*'},body=json.dumps({'code':'PGRST202','message':'fleeton_get_company missing'})))
+        page.reload();page.locator('#user-email').wait_for();page.locator('[data-t="company"]').click();expect(page.locator('#company-status')).to_contain_text('006_company.sql');expect(page.locator('#company-name')).to_be_disabled()
+        page.locator('[data-t="car"]').click();expect(page.locator('#car')).to_be_visible()
+        context.unroute('**/rest/v1/rpc/fleeton_get_company')
         profile_context['role']='manager'
         profile_context['invitation']={'email':'manager@example.com'}
         invite_failure['enabled']=True
@@ -186,6 +191,8 @@ try:
         page.reload();page.locator('#user-email').wait_for()
         assert sum('/fleeton_accept_invite' in x for x in calls[invitation_start:])==1
         assert not page.locator('.tabs').is_visible()
+        expect(page.locator('#company-identity')).to_contain_text('Empresa da Frota')
+        expect(page.locator('#company')).to_be_empty()
         expect(page.locator('#alerts-shortcut')).to_have_count(0)
         expect(page.locator('.alert-item')).to_have_count(0)
         expect(page.locator('#invite-form')).to_have_count(0) and page.locator('#import').count()==0

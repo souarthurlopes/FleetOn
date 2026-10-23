@@ -1,4 +1,5 @@
 const pageInfo={
+ company:['Minha empresa','Identifique sua empresa para a equipe e os relatórios.'],
  dash:['Visão geral','Acompanhe sua frota em um só lugar.'],
  car:['Veículos','Disponibilidade, revisões e viagens da sua frota.'],
  drv:['Motoristas','Sua equipe pronta para seguir em frente.'],
@@ -44,7 +45,7 @@ function navigateLayout(page) {
  document.querySelector('#profile-navigation').setAttribute('aria-current',profile?'page':'false');
  document.querySelector('#driver-navigation').setAttribute('aria-current',page==='car'?'page':'false');
  navigation.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(!profile&&b.dataset.t===(page==='detail'?'car':page))));
- if(!profile) ['dash','car','drv','log','fin','hist','alerts','reports','detail'].forEach(id=>document.querySelector('#'+id).hidden=id!==page);
+ if(!profile) ['dash','car','drv','log','fin','hist','alerts','reports','detail','company'].forEach(id=>document.querySelector('#'+id).hidden=id!==page);
  updatePageHeading();setSidebar(false);
 }
 function layoutAccount() {
