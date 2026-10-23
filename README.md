@@ -21,7 +21,7 @@ Nenhum serviço foi criado ou publicado automaticamente por este repositório.
    para habilitar os perfis e as permissões. Para o checklist dos motoristas,
    execute também [`supabase/003_inspection.sql`](supabase/003_inspection.sql). Para a
    atualização automática do gestor, execute [`supabase/004_auto_sync.sql`](supabase/004_auto_sync.sql). As migrações podem ser reaplicadas
-   na ordem 001 → 002 → 003 → 004 sem apagar os dados. Se já executou 001, 002 e 003, basta executar 004 nesta etapa.
+   na ordem 001 → 002 → 003 → 004 → 005 sem apagar os dados. Se já executou 001, 002 e 003, basta executar 004 nesta etapa.
 3. Em **Project Settings → API** (ou **API Keys**), copie a **Project URL** e a
    chave **publishable** (`sb_publishable_...`) ou a chave legada **anon**.
    São configurações públicas. Nunca use `service_role`, `sb_secret_...` ou a
@@ -303,3 +303,20 @@ faz repetidas consultas completas. Depois de executar o SQL, clique em
 **Atualizar dados**. Os testes locais validam a função em PostgreSQL e usam duas
 sessões reais em `python3 tests/browser_sync.py` para verificar o temporizador,
 as mudanças de ocupação, rascunhos, respostas atrasadas, falha de rede e saída.
+
+## Km na retirada e na devolução
+
+Informe o valor do **hodômetro do veículo** em cada etapa, não a distância que
+pretende percorrer. Os campos começam vazios para exigir a leitura real. A retirada
+aceita um valor igual ou maior que o último km registrado; a devolução aceita um
+valor igual ou maior que o da retirada. O registro e a comparação guardam os dois
+valores e a distância calculada: saída em 110 km e volta em 125 km = 15 km rodados.
+O km informado na saída atualiza o hodômetro, mas uma diferença anterior à retirada
+não é atribuída à nova viagem.
+
+Execute **supabase/005_trip_odometer.sql** no SQL Editor após as atualizações
+anteriores. Ela preserva dados e permissões, valida os valores no banco e cria o
+endpoint de viagem com hodômetro. O endpoint anterior é revogado para evitar
+clientes antigos que ignoravam o km inicial. A interface identifica quando essa
+atualização está faltando, sem confirmar uma retirada com distância incorreta.
+Para gestor, o fluxo completo da frota também registra esses valores.

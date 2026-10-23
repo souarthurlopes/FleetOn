@@ -146,8 +146,8 @@ window.addEventListener('fleeton-recovery',recoveryScreen);
 
 async function driverTrip(action,car) {
   try {
-    const km=action==='in'?FleetInspection.returnKm(document.querySelector('#kmf').value,car.km):null;
-    if(action==='in'&&km===null)throw new Error('Informe uma quilometragem final igual ou maior que a atual.');
+    const km=FleetInspection.returnKm(document.querySelector(action==='in'?'#kmf':'#kmi').value,car.km);
+    if(km===null)throw new Error(action==='in'?'Informe o km da devolução, igual ou maior que o da retirada.':'Informe o km da retirada, igual ou maior que o último registrado.');
     const inspection=await readInspection();
     const fleet=await api('inspectionTrip',{p_version:cloud.version,p_car_id:car.id,p_action:action,p_km:km,p_destination:action==='out'?document.querySelector('#dest').value.trim():'',p_checklist:inspection});
     cloud.version=fleet.version;resetView(fleet.state);cloud.lastState=JSON.stringify(stateOnly());syncStatus.textContent='Viagem registrada.';

@@ -54,7 +54,7 @@ try:
                 if args['p_action']=='invite':team['invites']=[{'email':args['p_email']}]
                 if args['p_action']=='remove':team['invites']=[]
                 return reply(team)
-            if path.startswith('/rest/v1/rpc/fleeton_driver_inspection'):
+            if path.startswith('/rest/v1/rpc/fleeton_driver_odometer'):
                 args=req.post_data_json
                 car=fleet['state']['cars'][0]
                 if args['p_action']=='out':car['uso']={'user_id':user['id'],'mot':'Ana','dest':args['p_destination'],'quando':'Hoje','kmIni':car['km']}
@@ -173,12 +173,12 @@ try:
         expect(page.locator('.alert-item')).to_have_count(0)
         expect(page.locator('#invite-form')).to_have_count(0) and page.locator('#import').count()==0
         assert not page.locator('[data-go="add:0"]').is_visible()
-        page.locator('[data-go^="open:"]').click();page.locator('#dest').fill('Cliente');page.locator('#comb').select_option('Cheio');page.locator('#inspection-confirm').check();page.locator('[data-go^="out:"]').click()
+        page.locator('[data-go^="open:"]').click();page.locator('#dest').fill('Cliente');page.locator('#kmi').fill('100');page.locator('#comb').select_option('Cheio');page.locator('#inspection-confirm').check();page.locator('[data-go^="out:"]').click()
         page.get_by_text('Viagem registrada.',exact=True).wait_for();assert fleet['state']['cars'][0]['uso']['user_id']==user['id']
         page.locator('[data-go^="open:"]').click();page.locator('#kmf').fill('125');page.locator('#comb').select_option('1/2');page.locator('#inspection-confirm').check();page.locator('[data-go^="in:"]').click()
         page.wait_for_function("document.querySelector('.meta').textContent.includes('125')")
         assert fleet['state']['cars'][0]['km']==125
-        assert any('/fleeton_driver_inspection' in call for call in calls)
+        assert any('/fleeton_driver_odometer' in call for call in calls)
         page.locator('#logout').click();page.locator('#email').wait_for();assert not page.locator('#workspace').is_visible()
         assert any('/recover' in x for x in calls)
         assert not errors,errors

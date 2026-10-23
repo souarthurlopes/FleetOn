@@ -152,3 +152,33 @@ test('Consulta de sincronização expõe somente versão/cargo da própria frota
   assert.equal((await call('fleeton_get_fleet')).state.log[0].valor,999);
  }finally{await db.close();}
 });
+
+test('Hodômetro registra km de retirada/devolução e calcula somente o percurso da viagem',async()=>{
+ const db=new PGlite(),manager='11111111-1111-1111-1111-111111111111',driver='22222222-2222-2222-2222-222222222222';
+ const identity=uid=>db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);
+ const call=async(fn,args=[])=> (await db.query(`select public.${fn}(${args.map((_,i)=>'$'+(i+1)).join(',')}) as result`,args)).rows[0].result;
+ const checklist={version:1,fuel:'Cheio',items:{exterior:'ok',interior:'ok',tires:'ok',lights:'ok',equipment:'ok'},notes:'',photos:{},confirmed:true};
+ const trip=(version,action,km)=>call('fleeton_driver_odometer',[version,1,action,km,'Destino',JSON.stringify(checklist)]);
+ try{
+  await db.exec(`create role anon;create role authenticated;create schema auth;grant usage on schema auth to authenticated,anon;
+   create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
+   create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;`);
+  await db.query('insert into auth.users values($1,$2,now()),($3,$4,now())',[manager,'manager@test.com',driver,'driver@test.com']);
+  for(const file of ['001_fleeton.sql','002_profiles_roles.sql','003_inspection.sql','004_auto_sync.sql','005_trip_odometer.sql'])await db.exec(await readFile(new URL('../supabase/'+file,import.meta.url),'utf8'));
+  await db.exec('set role anon');await assert.rejects(trip(1,'out',110),/permission denied/);
+  await db.exec('set role authenticated');await identity(manager);await call('fleeton_context');await call('fleeton_get_fleet');
+  await call('fleeton_save_fleet',[0,JSON.stringify({cars:[{id:1,placa:'ABC1234',modelo:'Teste',km:100,prox:10000,uso:null}],drivers:[],log:[],fines:[]})]);
+  await call('fleeton_team',['invite','driver@test.com']);await identity(driver);await call('fleeton_accept_invite');
+  await assert.rejects(trip(1,'out',null),/TRIP_KM/);await assert.rejects(trip(1,'out',99),/TRIP_KM/);
+  assert.equal((await call('fleeton_get_fleet')).state.cars[0].km,100);
+  await assert.rejects(call('fleeton_driver_inspection',[1,1,'out',110,'Destino',JSON.stringify(checklist)]),/permission denied/);
+  let result=await trip(1,'out',110);assert.equal(result.state.cars[0].uso.kmIni,110);assert.equal(result.state.cars[0].km,110);
+  await assert.rejects(trip(2,'in',109),/TRIP_KM/);
+  await trip(2,'in',125);await identity(manager);result=await call('fleeton_get_fleet');
+  assert.equal(result.state.log[0].km,110);assert.equal(result.state.log[1].km_inicio,110);assert.equal(result.state.log[1].km_fim,125);assert.equal(result.state.log[1].rodou,15);
+  assert.equal(result.state.cars[0].km,125);assert.equal(result.state.cars[0].uso,null);
+  await assert.rejects(trip(3,'out',130),/FLEET_FORBIDDEN/);
+  await db.exec('reset role');await db.exec(await readFile(new URL('../supabase/005_trip_odometer.sql',import.meta.url),'utf8'));await db.exec('set role authenticated');await identity(manager);
+  assert.equal((await call('fleeton_get_fleet')).state.log.length,2);
+ }finally{await db.close();}
+});
